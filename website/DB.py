@@ -6,6 +6,6 @@ engine = create_engine(
     'sqlite:///generatePairsDB.db',
     connect_args={"check_same_thread": False}
 )
-Session = sessionmaker(engine, expire_on_commit=False)
+Session = sessionmaker(bind=engine, expire_on_commit=False)
 Base = declarative_base()
 session = Session()

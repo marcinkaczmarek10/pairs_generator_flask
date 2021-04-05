@@ -20,17 +20,24 @@ def home_view():
 @views.route('/login', methods=['GET', 'POST'])
 def login():
     if current_user.is_authenticated:
+
         return redirect('/')
+
     form = LoginForm()
+
     if form.validate_on_submit():
         user = session.query(User).filter_by(email=form.email.data).first()
+
         if user and check_password_hash(user.password, form.password.data):
             login_user(user, remember=form.remember.data)
             redirect_page = request.args.get('next')
             flash('You have been logged in', 'success')
+
             return redirect(redirect_page) if redirect_page else redirect('/')
+
         else:
             flash('Login unsuccessful', 'danger')
+
     return render_template(
         'login.html',
         title='Login',
@@ -47,8 +54,11 @@ def logout():
 @views.route('/register', methods=['GET', 'POST'])
 def register():
     if current_user.is_authenticated:
+
         return redirect('/')
+
     form = RegistrationForm()
+
     if form.validate_on_submit():
         hashed_password = generate_password_hash(
             form.password.data,
@@ -59,6 +69,7 @@ def register():
             email=form.email.data,
             password=hashed_password
         )
+
         with session:
             try:
                 session.add(user)
@@ -69,8 +80,11 @@ def register():
                 raise error
             finally:
                 session.close()
+
         flash(f'Account created {form.username.data}!', 'success')
+
         return redirect('login')
+
     return render_template(
         'register.html',
         title='Register',
@@ -82,12 +96,14 @@ def register():
 @login_required
 def generate_pairs():
     form = GenerateRandomPairsForm()
+
     if form.validate_on_submit():
         random_person = RandomPairs(
             random_person_name=form.random_person_name.data,
             random_person_email=form.random_person_email.data,
             user_id=current_user.id
         )
+
         with session:
             try:
                 session.add(random_person)
@@ -97,8 +113,11 @@ def generate_pairs():
                 raise
             finally:
                 session.close()
+
         return redirect('/generate-pairs')
+
     user_pair = session.query(RandomPairs).filter_by(user_id=current_user.id).all()
+
     return render_template(
         'generate_pairs.html',
         title='Generate random pairs',
@@ -112,6 +131,7 @@ def generate_pairs():
 def delete_pair():
     pair = session.query(
         RandomPairs).filter_by(user_id=current_user.id).order_by(RandomPairs.id.desc()).first()
+
     with session:
         try:
             session.delete(pair)
@@ -121,6 +141,7 @@ def delete_pair():
             raise
         finally:
             session.close()
+
     return redirect('/generate-pairs')
 
 
