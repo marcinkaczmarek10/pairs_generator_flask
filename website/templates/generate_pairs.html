@@ -1,0 +1,77 @@
+{% extends 'layout.html' %}
+{% block content %}
+<div class="content-section">
+    <div class="form-group">
+        <div class="form-group">
+            <div class="form-group">
+                <form method="POST" action="">
+                {{ form.hidden_tag() }}
+                <fieldset class="form-group">
+                    <legend class="border-bottom mb-4">Generate Pairs</legend>
+                     <div class="form-group">
+                       {{ form.random_person_name.label(class="form-control-label") }}
+                         {% if form.random_person_name.errors %}
+                            {{ form.random_person_name(class="form-control form-control-lg is-invalid") }}
+                            <div class="invalid-feedback">
+                                {% for error in form.random_person_name.errors %}
+                                    <span>{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                         {% else %}
+                            {{ form.random_person_name(class="form-control form-control-lg") }}
+                         {% endif %}
+                     </div>
+                    <div class="form-group">
+                        <div class="form-group">
+                            {{ form.random_person_email.label(class="form-control-label") }}
+                                {% if form.random_person_email.errors %}
+                                    {{ form.random_person_email(class="form-control form-control-lg is-invalid") }}
+                                        <div class="invalid-feedback">
+                                            {% for error in form.random_person_email.errors %}
+                                                <span>{{ error }}</span>
+                                            {% endfor %}
+                                        </div>
+                                {% else %}
+                                    {{ form.random_person_email(class="form-control form-control-lg") }}
+                                {% endif %}
+                        </div>
+                        <br />
+                        <div class="form-group">
+                            {{ form.add_item(class='btn btn-outline-info') }}
+                        </div>
+                </div>
+                </fieldset>
+                </form>
+                        <div class="form-group">
+                            <form action="{{ url_for('views.delete_pair') }}" method="POST">
+                                {{ form.remove_item(class='btn btn-outline-info') }}
+                            </form>
+                        </div>
+                        <br />
+            </div>
+            {% for pair in user_pair %}
+            <ul class="list-group list-group-flush">
+                <div class="form-group">
+                    <li class="list-group-item">
+                    {{ pair.random_person_name }}
+                    {{ pair.random_person_email }}
+                    </li>
+                </div>
+            </ul>
+            {% endfor %}
+            <br />
+            <div class="form-group" align="center">
+                <form action="{{ url_for('views.results') }}" method="POST">
+                    {{ form.submit(class='btn btn-outline-info') }}
+                </form>
+
+            </div>
+        </div>
+    </div>
+</div>
+<script
+    type="text/javascript"
+    src="{{ url_for('static', filename='main.js') }}"
+>
+</script>
+{% endblock %}
