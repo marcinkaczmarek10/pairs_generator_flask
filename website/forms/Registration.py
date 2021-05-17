@@ -1,8 +1,8 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, SubmitField, BooleanField
+from wtforms import StringField, PasswordField, SubmitField
 from wtforms.validators import DataRequired, Length, Email, EqualTo, ValidationError
-from .DB import session
-from .models import User
+from website.DB import session
+from website.models import User
 
 
 class RegistrationForm(FlaskForm):
@@ -46,51 +46,3 @@ class RegistrationForm(FlaskForm):
         email = session.query(User).filter_by(email=email.data).first()
         if email:
             raise ValidationError('This email is taken.')
-
-
-class LoginForm(FlaskForm):
-    email = StringField(
-        'email',
-        validators=[
-            DataRequired(),
-            Email()
-        ]
-    )
-    password = PasswordField(
-        'password',
-        validators=[
-            DataRequired()
-        ]
-    )
-    remember = BooleanField(
-        'Remember Me'
-    )
-    submit = SubmitField(
-        'Login'
-    )
-
-
-class GenerateRandomPairsForm(FlaskForm):
-    random_person_name = StringField(
-        'name',
-        validators=[
-            DataRequired(),
-            Length(min=2, max=20)
-        ]
-    )
-    random_person_email = StringField(
-        'email',
-        validators=[
-            DataRequired(),
-            Email()
-        ]
-    )
-    add_item = SubmitField(
-        'Add Item'
-    )
-    remove_item = SubmitField(
-        'Remove Item'
-    )
-    submit = SubmitField(
-        'Submit'
-    )

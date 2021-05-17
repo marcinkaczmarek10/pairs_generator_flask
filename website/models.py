@@ -1,13 +1,7 @@
 from website.DB import Base, engine
 from sqlalchemy import Column, Integer, String, ForeignKey
 from sqlalchemy.orm import relationship
-from website import app
-from flask_login import UserMixin, LoginManager
-from .DB import session
-
-login_manager = LoginManager(app)
-login_manager.login_view = 'views.login'
-login_manager.login_message_category = 'info'
+from flask_login import UserMixin
 
 
 class User(Base, UserMixin):
@@ -88,11 +82,6 @@ class RandomPairsResults(Base):
 
     def __repr__(self):
         return f'RandomPairsResults({self.results})'
-
-
-@login_manager.user_loader
-def load_user(user_id):
-    return session.query(User).get(int(user_id))
 
 
 Base.metadata.create_all(engine)

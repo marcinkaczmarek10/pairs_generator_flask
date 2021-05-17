@@ -43,7 +43,7 @@
                 </fieldset>
                 </form>
                         <div class="form-group">
-                            <form action="{{ url_for('views.delete_pair') }}" method="POST">
+                            <form action="{{ url_for('generate_pairs.delete_pair') }}" method="POST">
                                 {{ form.remove_item(class='btn btn-outline-info') }}
                             </form>
                         </div>
@@ -61,7 +61,7 @@
             {% endfor %}
             <br />
             <div class="form-group" align="center">
-                <form action="{{ url_for('views.results') }}" method="POST">
+                <form action="{{ url_for('generate_pairs.results') }}" method="POST">
                     {{ form.submit(class='btn btn-outline-info') }}
                 </form>
 

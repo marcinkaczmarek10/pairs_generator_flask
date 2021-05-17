@@ -1,100 +1,18 @@
 from flask import Blueprint, render_template, flash, redirect, request, jsonify
-from flask_login import current_user, login_user, logout_user, login_required
-from .forms import RegistrationForm, LoginForm, GenerateRandomPairsForm
-from .DB import session
-from . models import User, RandomPairs, RandomPairsResults
-from werkzeug.security import generate_password_hash, check_password_hash
-from .generate_random_pairs import generate_random_pairs, RandomPerson
+from flask_login import current_user, login_required
+from website.forms.GenerateRandomPairs import GenerateRandomPairsForm
+from website.DB import session
+from website.models import RandomPairs, RandomPairsResults
+from website.generate_pairs.generate_random_pairs import generate_random_pairs, RandomPerson
 import json
 
-views = Blueprint('views', __name__)
+
+generate_pairs = Blueprint('generate_pairs', __name__)
 
 
-@views.route('/')
-def home_view():
-    return render_template(
-        'home.html',
-        )
-
-
-@views.route('/login', methods=['GET', 'POST'])
-def login():
-    if current_user.is_authenticated:
-
-        return redirect('/')
-
-    form = LoginForm()
-
-    if form.validate_on_submit():
-        user = session.query(User).filter_by(email=form.email.data).first()
-
-        if user and check_password_hash(user.password, form.password.data):
-            login_user(user, remember=form.remember.data)
-            redirect_page = request.args.get('next')
-            flash('You have been logged in', 'success')
-
-            return redirect(redirect_page) if redirect_page else redirect('/')
-
-        else:
-            flash('Login unsuccessful', 'danger')
-
-    return render_template(
-        'login.html',
-        title='Login',
-        form=form
-    )
-
-
-@views.route('/logout')
-def logout():
-    logout_user()
-    return redirect('/')
-
-
-@views.route('/register', methods=['GET', 'POST'])
-def register():
-    if current_user.is_authenticated:
-
-        return redirect('/')
-
-    form = RegistrationForm()
-
-    if form.validate_on_submit():
-        hashed_password = generate_password_hash(
-            form.password.data,
-            method='sha256'
-        )
-        user = User(
-            username=form.username.data,
-            email=form.email.data,
-            password=hashed_password
-        )
-
-        with session:
-            try:
-                session.add(user)
-                session.commit()
-            except Exception as error:
-                session.rollback()
-                print(error)
-                raise error
-            finally:
-                session.close()
-
-        flash(f'Account created {form.username.data}!', 'success')
-
-        return redirect('login')
-
-    return render_template(
-        'register.html',
-        title='Register',
-        form=form
-    )
-
-
-@views.route('/generate-pairs', methods=['GET', 'POST'])
+@generate_pairs.route('/generate-pairs', methods=['GET', 'POST'])
 @login_required
-def generate_pairs():
+def pairs():
     form = GenerateRandomPairsForm()
 
     if form.validate_on_submit():
@@ -126,7 +44,7 @@ def generate_pairs():
     )
 
 
-@views.route('/delete-pair', methods=['POST'])
+@generate_pairs.route('/delete-pair', methods=['POST'])
 @login_required
 def delete_pair():
     pair = session.query(
@@ -145,7 +63,7 @@ def delete_pair():
     return redirect('/generate-pairs')
 
 
-@views.route('/results', methods=['GET', 'POST'])
+@generate_pairs.route('/results', methods=['GET', 'POST'])
 @login_required
 def results():
     user_random_person_pool = session.query(RandomPairs).filter_by(user_id=current_user.id).all()
@@ -199,7 +117,7 @@ def results():
         return redirect('/generate-pairs')
 
 
-@views.route('/show-results')
+@generate_pairs.route('/show-results')
 @login_required
 def show_results():
     user_random_pairs_result = session.query(RandomPairsResults).filter_by(user_id=current_user.id).all()
@@ -210,23 +128,22 @@ def show_results():
     )
 
 
-@views.route('/delete-result', methods=['POST'])
+@generate_pairs.route('/delete-result', methods=['POST'])
 @login_required
 def delete_result():
     result_to_delete = json.loads(request.data)
     result_id = result_to_delete.get('resultId')
     result_query = session.query(RandomPairsResults).get(result_id)
 
-    if result_query:
-        if result_query.user_id == current_user.id:
-            with session:
-                try:
-                    session.delete(result_query)
-                    session.commit()
-                except Exception:
-                    session.rollback()
-                    raise
-                finally:
-                    session.close()
+    if result_query and result_query.user_id == current_user.id:
+        with session:
+            try:
+                session.delete(result_query)
+                session.commit()
+            except Exception:
+                session.rollback()
+                raise
+            finally:
+                session.close()
 
-            return jsonify({})
+        return jsonify({})

@@ -8,7 +8,7 @@ class RandomPerson:
 
 
 def generate_random_pairs(random_people) -> list:
-    draw_pool = random_people[:]
+    draw_pool = random_people.copy()
     draw_results = []
 
     for person in random_people:
