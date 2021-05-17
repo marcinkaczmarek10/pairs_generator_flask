@@ -2,6 +2,7 @@ from flask import Blueprint, render_template, flash, redirect, request
 from flask_login import current_user, login_user, logout_user
 from website.forms.Login import LoginForm
 from website.forms.Registration import RegistrationForm
+from website.forms.reset_password import ResetPasswordForm, ResetPasswordSubmitForm
 from website.DB import session
 from website.models import User
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -47,7 +48,6 @@ def logout():
 @auth.route('/register', methods=['GET', 'POST'])
 def register():
     if current_user.is_authenticated:
-
         return redirect('/')
 
     form = RegistrationForm()
@@ -83,3 +83,35 @@ def register():
         title='Register',
         form=form
     )
+
+
+@auth.route('/reset-password', methods=['GET', 'POST'])
+def reset_password_submit():
+    if current_user.is_authenticated:
+        return redirect('/')
+    form = ResetPasswordSubmitForm()
+    return render_template(
+        'reset_password.html',
+        title='Reset_password_submit',
+        form=form
+    )
+
+
+@auth.route('/reset-password/<token>', methods=['GET', 'POST'])
+def reset_password(token):
+    if current_user.is_authenticated:
+        return redirect('/')
+
+    verified_user = User.verify_token(token)
+    if not verified_user:
+        flash('blank', 'danger')
+        return redirect('/reset-password')
+    form = ResetPasswordForm()
+
+    return render_template(
+        'reset_password.html',
+        title='Reset Password',
+        form=form
+    )
+
+#TODO: validate_on_submit, generate tokens

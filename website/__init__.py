@@ -1,19 +1,19 @@
 from flask import Flask
 from website.login_manager import login_manager
+from website.config import DevelopConfig
 
 
-app = Flask(__name__)
-
-
-def create_app():
-    app.config['SECRET_KEY'] = '9c5ac8693843f7eed9732e2db1758723'
+def create_app(config_name=DevelopConfig):
+    app = Flask(__name__)
+    app.config.from_object(config_name)
     login_manager.init_app(app)
 
-    from website.auth.auth import auth
-    from website.generate_pairs.generate_pairs import generate_pairs
-    from website.main.main import main
+    from website.auth.routes import auth
+    from website.generate_pairs.routes import generate_pairs
+    from website.main.routes import main
 
     app.register_blueprint(auth)
     app.register_blueprint(generate_pairs)
     app.register_blueprint(main)
+
     return app

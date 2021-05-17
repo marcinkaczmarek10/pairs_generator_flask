@@ -1,24 +1,31 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField
 from wtforms.validators import DataRequired, Length, Email, EqualTo, ValidationError
+from website.DB import session
+from website.models import User
 
-class BaseForm(FlaskForm):
-    username = StringField(
-        'Username',
-        validators=[
-            DataRequired(),
-            Length(min=2, max=20)
-        ]
-    )
+
+class ResetPasswordSubmitForm(FlaskForm):
     email = StringField(
         'Email',
         validators=[
             DataRequired(),
-            Email()
+            Email(),
         ]
     )
+    submit = SubmitField(
+        'Reset Password'
+    )
+
+    def validate_email(self, email):
+        email = session.query(User).filter_by(email=email.data).first()
+        if not email:
+            raise ValidationError('This email does not exist')
+
+
+class ResetPasswordForm(FlaskForm):
     password = PasswordField(
-        'Password',
+        'New Password',
         validators=[
             DataRequired()
         ]
@@ -31,5 +38,5 @@ class BaseForm(FlaskForm):
         ]
     )
     submit = SubmitField(
-        'Sign Up'
+        'Reset Password'
     )
