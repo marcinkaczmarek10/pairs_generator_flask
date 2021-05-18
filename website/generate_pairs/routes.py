@@ -1,8 +1,8 @@
 from flask import Blueprint, render_template, flash, redirect, request, jsonify
 from flask_login import current_user, login_required
 from website.forms.GenerateRandomPairs import GenerateRandomPairsForm
-from website.DB import session
-from website.models import RandomPairs, RandomPairsResults
+from website.database.DB import session
+from website.database.models import RandomPairs, RandomPairsResults
 from website.generate_pairs.generate_random_pairs import generate_random_pairs, RandomPerson
 import json
 

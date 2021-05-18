@@ -3,8 +3,9 @@ from flask_login import current_user, login_user, logout_user
 from website.forms.Login import LoginForm
 from website.forms.Registration import RegistrationForm
 from website.forms.reset_password import ResetPasswordForm, ResetPasswordSubmitForm
-from website.DB import session
-from website.models import User
+from website.database.DB import session
+from website.database.models import User
+from website.utils.email import send_reset_password_mail
 from werkzeug.security import generate_password_hash, check_password_hash
 
 
@@ -90,8 +91,15 @@ def reset_password_submit():
     if current_user.is_authenticated:
         return redirect('/')
     form = ResetPasswordSubmitForm()
+    if form.validate_on_submit():
+        verified_user = session.query(User).filter_by(email=form.email.data).first()
+        if verified_user is None:
+            flash('no user', 'danger')
+        send_reset_password_mail(verified_user)
+        flash('Reset link sent to your email', 'succes')
+        return redirect('/login')
     return render_template(
-        'reset_password.html',
+        'reset_password_submit.html',
         title='Reset_password_submit',
         form=form
     )
@@ -107,11 +115,27 @@ def reset_password(token):
         flash('blank', 'danger')
         return redirect('/reset-password')
     form = ResetPasswordForm()
+    if form.validate_on_submit():
+        hashed_password = generate_password_hash(
+            form.password.data,
+            method='sha256'
+        )
+        user_new_password = User(
+            password=hashed_password
+        )
+        with session:
+            try:
+                session.add(user_new_password)
+                session.commit()
+            except Exception:
+                session.rollback()
+            finally:
+                session.close()
+        flash('Password Updated!', 'succes')
+        return redirect('/login')
 
     return render_template(
         'reset_password.html',
         title='Reset Password',
         form=form
     )
-
-#TODO: validate_on_submit, generate tokens

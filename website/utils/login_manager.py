@@ -1,6 +1,6 @@
 from flask_login import LoginManager
-from website.DB import session
-from website.models import User
+from website.database.DB import session
+from website.database.models import User
 #from abc import ABC, abstractmethod
 
 

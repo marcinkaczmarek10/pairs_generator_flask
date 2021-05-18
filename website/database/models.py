@@ -1,10 +1,10 @@
-from website.DB import Base, engine
+from website.database.DB import Base, engine
 from sqlalchemy import Column, Integer, String, ForeignKey
 from sqlalchemy.orm import relationship
 from flask_login import UserMixin
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 from flask import current_app
-from .DB import session
+from website.database.DB import session
 
 
 class User(Base, UserMixin):
