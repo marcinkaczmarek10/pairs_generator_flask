@@ -1,4 +1,5 @@
 from random import choice
+import json
 
 
 class RandomPerson:
@@ -7,13 +8,13 @@ class RandomPerson:
         self.email = email
 
 
-def generate_random_pairs(random_people) -> list:
+def _generate_random_pairs(random_people) -> list:
     draw_pool = random_people.copy()
     draw_results = []
 
     for person in random_people:
         if draw_pool == [person]:
-            return generate_random_pairs(random_people)
+            return _generate_random_pairs(random_people)
 
         chosen_person = choice(draw_pool)
 
@@ -24,3 +25,13 @@ def generate_random_pairs(random_people) -> list:
         draw_results.append([person, chosen_person])
 
     return draw_results
+
+
+def generate_random_pairs(random_person_pool):
+    random_pairs = _generate_random_pairs(random_person_pool)
+    pairs_list = []
+
+    for [person_one, person_two] in random_pairs:
+        pairs_list.append([f'{person_one.name}, {person_one.email}', f'{person_two.name}, {person_two.email}'])
+
+    return json.dumps(pairs_list)

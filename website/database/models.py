@@ -1,5 +1,5 @@
 from website.database.DB import Base, engine
-from sqlalchemy import Column, Integer, String, ForeignKey
+from sqlalchemy import Column, Integer, String, ForeignKey, Boolean
 from sqlalchemy.orm import relationship
 from flask_login import UserMixin
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
@@ -27,6 +27,10 @@ class User(Base, UserMixin):
     password = Column(
         String(60),
         nullable=False
+    )
+    is_confirmed = Column(
+        Boolean,
+        default=False
     )
     user_pairs = relationship(
         'RandomPairs'

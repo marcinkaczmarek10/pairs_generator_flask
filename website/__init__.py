@@ -14,10 +14,12 @@ def create_app(config_name=DevelopConfig):
     from website.generate_pairs.routes import generate_pairs
     from website.main.routes import main
     from website.errors.error_handlers import errors
+    from website.API.generate_pairs import api
 
     app.register_blueprint(auth)
     app.register_blueprint(generate_pairs)
     app.register_blueprint(main)
     app.register_blueprint(errors)
+    app.register_blueprint(api, url_prefix='/api/')
 
     return app

@@ -5,7 +5,7 @@ from website.forms.Registration import RegistrationForm
 from website.forms.reset_password import ResetPasswordForm, ResetPasswordSubmitForm
 from website.database.DB import session
 from website.database.models import User
-from website.utils.email import send_reset_password_mail
+from website.utils.email import send_reset_password_mail, send_verifiaction_mail
 from werkzeug.security import generate_password_hash, check_password_hash
 
 
@@ -75,7 +75,11 @@ def register():
             finally:
                 session.close()
 
-        flash(f'Account created {form.username.data}!', 'success')
+        send_verifiaction_mail(user)
+        flash(
+            f'Account created {form.username.data}! Confirmation link was sent to your email.',
+            'success'
+        )
 
         return redirect('login')
 
@@ -96,7 +100,7 @@ def reset_password_submit():
         if verified_user is None:
             flash('no user', 'danger')
         send_reset_password_mail(verified_user)
-        flash('Reset link sent to your email', 'succes')
+        flash('Reset link sent to your email', 'success')
         return redirect('/login')
     return render_template(
         'reset_password_submit.html',
@@ -120,18 +124,20 @@ def reset_password(token):
             form.password.data,
             method='sha256'
         )
-        user_new_password = User(
-            password=hashed_password
-        )
+        user_new_password = {
+            User.password: hashed_password
+        }
         with session:
             try:
-                session.add(user_new_password)
+                session.query(
+                    User).filter_by(id=verified_user).update(user_new_password)
                 session.commit()
-            except Exception:
+            except Exception as err:
                 session.rollback()
+                print(err)
             finally:
                 session.close()
-        flash('Password Updated!', 'succes')
+        flash('Password Updated!', 'success')
         return redirect('/login')
 
     return render_template(
@@ -139,3 +145,27 @@ def reset_password(token):
         title='Reset Password',
         form=form
     )
+
+
+@auth.route('/confirm-email/<token>', methods=['GET', 'POST'])
+def confirm_email(token):
+    verified_user = User.verify_token(token)
+    if User.is_confirmed is True:
+        flash('Your email is already confirmed', 'info')
+        return redirect('/')
+
+    if verified_user:
+        try:
+            session.query(User).filter_by(id=verified_user).update(User.is_confirmed is True)
+            session.commit()
+            flash('Your email has been confirmed.', 'info')
+            return redirect('/login')
+        except Exception as e:
+            session.rollback()
+            print(e)
+            flash('Something went wrong', 'danger')
+            return redirect('/')
+        finally:
+            session.close()
+
+    return render_template('confirm_email.html')
