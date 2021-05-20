@@ -74,7 +74,7 @@ def results():
     user_random_person_pool = session.query(
         RandomPairs).filter_by(user_id=current_user.id).all()
 
-    if len(user_random_person_pool) != 0 and len(user_random_person_pool) > 1:
+    if len(user_random_person_pool) > 1:
         random_person_pool = []
 
         for row in user_random_person_pool:

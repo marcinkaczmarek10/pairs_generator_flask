@@ -41,7 +41,7 @@ def get_user_pairs(user_id):
 def post_generate_pairs(user_id, user_pairs):
     user_random_people_pool = user_pairs
 
-    if len(user_random_people_pool) != 0 and len(user_random_people_pool) > 1:
+    if len(user_random_people_pool) > 1:
 
         random_people_pool = [
             RandomPerson(row.random_person_name, row.random_person_email) for row in user_random_people_pool
