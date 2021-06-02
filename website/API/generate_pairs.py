@@ -1,7 +1,7 @@
 #from . import api
 import json
 from flask import jsonify, url_for, abort
-from website.database.DB import session
+from website.database.DB import SessionFactory, SessionContextManager
 from website.database.models import RandomPairsResults, RandomPairs
 from flask import Blueprint
 from website.generate_pairs.generate_random_pairs import generate_random_pairs, RandomPerson
@@ -11,7 +11,7 @@ api = Blueprint('api', __name__)
 
 @api.route('/results/<user_id>')
 def get_results(user_id):
-    query = session.query(RandomPairsResults).filter_by(user_id=user_id).all()
+    query = SessionFactory.session.query(RandomPairsResults).filter_by(user_id=user_id).all()
     results = [each.results for each in query]
     results_serialized = json.dumps(results)
     user_pairs = url_for('api.get_user_pairs', user_id=['user_id'])
@@ -24,7 +24,7 @@ def get_results(user_id):
 
 @api.route('/pairs/<user_id>')
 def get_user_pairs(user_id):
-    query = session.query(RandomPairs).filter_by(user_id=user_id).all()
+    query = SessionFactory.session.query(RandomPairs).filter_by(user_id=user_id).all()
     user_pairs = []
     for pair in query:
         user_pairs.append(pair.results)
@@ -51,16 +51,9 @@ def post_generate_pairs(user_id, user_pairs):
             results=user_results,
             user_id=user_id
         )
-        with session:
-            try:
-                session.add(user_random_pairs)
-                session.query(RandomPairs).filter_by(user_id=user_id).delete()
-                session.commit()
-            except Exception as err:
-                session.rollback()
-                print(err)
-            finally:
-                session.close()
+        with SessionContextManager as sessionCM:
+            sessionCM.add(user_random_pairs)
+            sessionCM.query(RandomPairs).filter_by(user_id=user_id).delete()
 
         get_results_url = url_for('api.get_results', user_id=user_id)
         return jsonify({

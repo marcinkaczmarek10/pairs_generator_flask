@@ -3,7 +3,7 @@ from flask_login import current_user, login_user, logout_user
 from website.forms.Login import LoginForm
 from website.forms.Registration import RegistrationForm
 from website.forms.reset_password import ResetPasswordForm, ResetPasswordSubmitForm
-from website.database.DB import session
+from website.database.DB import SessionContextManager, SessionFactory
 from website.database.models import User
 from website.utils.email import send_reset_password_mail, send_verifiaction_mail
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -21,7 +21,7 @@ def login():
     form = LoginForm()
 
     if form.validate_on_submit():
-        user = session.query(User).filter_by(email=form.email.data).first()
+        user = SessionFactory.session.query(User).filter_by(email=form.email.data).first()
 
         if user and check_password_hash(user.password, form.password.data):
             login_user(user, remember=form.remember.data)
@@ -58,22 +58,18 @@ def register():
             form.password.data,
             method='sha256'
         )
-        user = User(
-            username=form.username.data,
-            email=form.email.data,
-            password=hashed_password
-        )
 
-        with session:
+        with SessionContextManager() as sessionCM:
+            user = User(
+                username=form.username.data,
+                email=form.email.data,
+                password=hashed_password
+            )
             try:
-                session.add(user)
-                session.commit()
-            except Exception as error:
-                session.rollback()
-                print(error)
-                raise error
-            finally:
-                session.close()
+                sessionCM.add(user)
+            except Exception as err:
+                flash('Nie dodało', 'danger')
+                raise err
 
         send_verifiaction_mail(user)
         flash(
@@ -96,7 +92,7 @@ def reset_password_submit():
         return redirect('/')
     form = ResetPasswordSubmitForm()
     if form.validate_on_submit():
-        verified_user = session.query(User).filter_by(email=form.email.data).first()
+        verified_user = SessionFactory.session.query(User).filter_by(email=form.email.data).first()
         if verified_user is None:
             flash('no user', 'danger')
         send_reset_password_mail(verified_user)
@@ -127,16 +123,9 @@ def reset_password(token):
         user_new_password = {
             User.password: hashed_password
         }
-        with session:
-            try:
-                session.query(
-                    User).filter_by(id=verified_user).update(user_new_password)
-                session.commit()
-            except Exception as err:
-                session.rollback()
-                print(err)
-            finally:
-                session.close()
+        with SessionContextManager as sessionCM:
+            sessionCM.query(
+                User).filter_by(id=verified_user).update(user_new_password)
         flash('Password Updated!', 'success')
         return redirect('/login')
 
@@ -155,17 +144,9 @@ def confirm_email(token):
         return redirect('/')
 
     if verified_user:
-        try:
-            session.query(User).filter_by(id=verified_user).update(User.is_confirmed is True)
-            session.commit()
+        with SessionContextManager() as sessionCM:
+            sessionCM.query(User).filter_by(id=verified_user).update(User.is_confirmed is True)
             flash('Your email has been confirmed.', 'info')
             return redirect('/login')
-        except Exception as e:
-            session.rollback()
-            print(e)
-            flash('Something went wrong', 'danger')
-            return redirect('/')
-        finally:
-            session.close()
 
     return render_template('confirm_email.html')

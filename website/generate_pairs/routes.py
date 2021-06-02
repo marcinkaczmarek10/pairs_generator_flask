@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, flash, redirect, request, jsonify
 from flask_login import current_user, login_required
 from website.forms.GenerateRandomPairs import GenerateRandomPairsForm
-from website.database.DB import session
+from website.database.DB import SessionFactory, SessionContextManager
 from website.database.models import RandomPairs, RandomPairsResults
 from website.generate_pairs.generate_random_pairs import RandomPerson, generate_random_pairs
 import json
@@ -22,19 +22,12 @@ def pairs():
             user_id=current_user.id
         )
 
-        with session:
-            try:
-                session.add(random_person)
-                session.commit()
-            except Exception as err:
-                session.rollback()
-                print(err)
-            finally:
-                session.close()
+        with SessionContextManager() as sessionCM:
+            sessionCM.add(random_person)
 
         return redirect('/generate-pairs')
 
-    user_pair = session.query(
+    user_pair = SessionFactory.session.query(
         RandomPairs).filter_by(user_id=current_user.id).all()
 
     return render_template(
@@ -48,19 +41,12 @@ def pairs():
 @generate_pairs.route('/delete-pair', methods=['POST'])
 @login_required
 def delete_pair():
-    pair = session.query(
+    pair = SessionFactory.session.query(
         RandomPairs).filter_by(user_id=current_user.id).order_by(RandomPairs.id.desc()).first()
 
     if pair:
-        with session:
-            try:
-                session.delete(pair)
-                session.commit()
-            except Exception:
-                session.rollback()
-                raise
-            finally:
-                session.close()
+        with SessionContextManager as sessionCM:
+            sessionCM.delete(pair)
 
         return redirect('/generate-pairs')
 
@@ -71,7 +57,7 @@ def delete_pair():
 @generate_pairs.route('/results', methods=['POST'])
 @login_required
 def results():
-    user_random_person_pool = session.query(
+    user_random_person_pool = SessionFactory.session.query(
         RandomPairs).filter_by(user_id=current_user.id).all()
 
     if len(user_random_person_pool) > 1:
@@ -88,16 +74,9 @@ def results():
             user_id=current_user.id
         )
 
-        with session:
-            try:
-                session.add(user_random_pairs)
-                session.query(RandomPairs).filter_by(user_id=current_user.id).delete()
-                session.commit()
-            except Exception as err:
-                session.rollback()
-                print(err)
-            finally:
-                session.close()
+        with SessionContextManager() as sessionCM:
+            sessionCM.add(user_random_pairs)
+            SessionFactory.session.query(RandomPairs).filter_by(user_id=current_user.id).delete()
 
         return redirect('/show-results')
 
@@ -108,12 +87,15 @@ def results():
 @generate_pairs.route('/show-results')
 @login_required
 def show_results():
-    user_random_pairs_result = session.query(
+    user_random_pairs_result = SessionFactory.session.query(
         RandomPairsResults).filter_by(user_id=current_user.id).all()
-    flat_results = [result for result in user_random_pairs_result]
-    print(flat_results)
+
+    flat_results = [result.results for result in user_random_pairs_result]
     print(user_random_pairs_result)
-    # TODO ogarnąć dostęp do tych list (results)
+    print(type(user_random_pairs_result))
+    json_results = str(flat_results)
+    print(json_results)
+
 
     return render_template(
         'results.html',
@@ -126,18 +108,10 @@ def show_results():
 def delete_result():
     result_to_delete = json.loads(request.data)
     result_id = result_to_delete['result_id']
-    result_query = session.query(RandomPairsResults).get(result_id)
+    result_query = SessionFactory.session.query(RandomPairsResults).get(result_id)
 
-    if result_query:
-        if result_query.user_id == current_user.id:
-            with session:
-                try:
-                    session.delete(result_query)
-                    session.commit()
-                except Exception as err:
-                    session.rollback()
-                    print(err)
-                finally:
-                    session.close()
+    if result_query and result_query.user_id == current_user.id:
+        with SessionContextManager() as sessionCM:
+            sessionCM.delete(result_query)
 
-            return jsonify({})
+        return jsonify({})

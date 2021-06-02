@@ -69,4 +69,3 @@ def send_verifiaction_mail(user):
     #     thread = Thread(target=SendMail.send_mail, args=[message])
     #     thread.start()
     # return thread
-

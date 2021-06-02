@@ -1,13 +1,12 @@
-from website.database.DB import Base, engine
 from sqlalchemy import Column, Integer, String, ForeignKey, Boolean
 from sqlalchemy.orm import relationship
 from flask_login import UserMixin
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 from flask import current_app
-from website.database.DB import session
+from website.database.DB import SessionFactory
 
 
-class User(Base, UserMixin):
+class User(SessionFactory.Base, UserMixin):
     __tablename__ = 'users'
 
     id = Column(
@@ -52,13 +51,13 @@ class User(Base, UserMixin):
             verified_user = serializer.loads(token)['user_id']
         except Exception:
             return None
-        return session.query(User).get(verified_user)
+        return SessionFactory.session.query(User).get(verified_user)
 
     def __repr__(self):
         return f'User({self.username},{self.email})'
 
 
-class RandomPairs(Base):
+class RandomPairs(SessionFactory.Base):
     __tablename__ = 'RandomPairs'
 
     id = Column(
@@ -84,7 +83,7 @@ class RandomPairs(Base):
         return f'RandomPairs({self.random_person_name}, {self.random_person_email})'
 
 
-class RandomPairsResults(Base):
+class RandomPairsResults(SessionFactory.Base):
     __tablename__ = 'randomPairResults'
 
     id = Column(
@@ -103,7 +102,7 @@ class RandomPairsResults(Base):
     )
 
     def __repr__(self):
-        return f'RandomPairsResults({self.results})'
+        return f'Results({self.results})'
 
 
-Base.metadata.create_all(engine)
+SessionFactory.Base.metadata.create_all(SessionFactory.engine)

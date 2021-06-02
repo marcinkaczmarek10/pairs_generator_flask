@@ -1,7 +1,7 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField
 from wtforms.validators import DataRequired, Length, Email, EqualTo, ValidationError
-from website.database.DB import session
+from website.database.DB import SessionFactory
 from website.database.models import User
 
 
@@ -38,11 +38,11 @@ class RegistrationForm(FlaskForm):
     )
 
     def validate_username(self, username):
-        user_name = session.query(User).filter_by(username=username.data).first()
+        user_name = SessionFactory.session.query(User).filter_by(username=username.data).first()
         if user_name:
             raise ValidationError('This name is taken.')
 
     def validate_email(self, email):
-        email = session.query(User).filter_by(email=email.data).first()
+        email = SessionFactory.session.query(User).filter_by(email=email.data).first()
         if email:
             raise ValidationError('This email is taken.')
