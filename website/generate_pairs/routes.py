@@ -91,15 +91,20 @@ def show_results():
         RandomPairsResults).filter_by(user_id=current_user.id).all()
 
     flat_results = [result.results for result in user_random_pairs_result]
-    print(user_random_pairs_result)
-    print(type(user_random_pairs_result))
-    json_results = str(flat_results)
-    print(json_results)
+    results = [eval(result) for result in flat_results]
+    user_id = [result.id for result in user_random_pairs_result]
 
+    random_results = []
+    # for pairs in results:
+    #     for (buyer, recipient)  in pairs:
+    #         for (buyer_name, buyer_email, recipient_name, recipient_email) in (buyer, recipient):
+    #             random_results.append([RandomPerson(buyer_name, buyer_email), RandomPerson(recipient_name, recipient_email)])
+    # print(random_results)
 
     return render_template(
         'results.html',
-        user_random_pairs_result=user_random_pairs_result
+        user_random_pairs_result=user_random_pairs_result,
+        user_id=user_id
     )
 
 

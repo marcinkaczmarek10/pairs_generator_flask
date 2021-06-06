@@ -40,4 +40,4 @@ def generate_random_pairs(random_person_pool):
     for [person_one, person_two] in random_pairs:
         pairs_list.append([f'{person_one.name}, {person_one.email}', f'{person_two.name}, {person_two.email}'])
 
-    return json.dumps(random_pairs)
+    return json.dumps(pairs_list)
