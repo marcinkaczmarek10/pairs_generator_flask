@@ -1,16 +1,12 @@
-from website.DB import Base, engine
-from sqlalchemy import Column, Integer, String, ForeignKey
+from sqlalchemy import Column, Integer, String, ForeignKey, Boolean
 from sqlalchemy.orm import relationship
-from website import app
-from flask_login import UserMixin, LoginManager
-from .DB import session
-
-login_manager = LoginManager(app)
-login_manager.login_view = 'views.login'
-login_manager.login_message_category = 'info'
+from flask_login import UserMixin
+from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
+from flask import current_app
+from website.database.DB import SessionFactory
 
 
-class User(Base, UserMixin):
+class User(SessionFactory.Base, UserMixin):
     __tablename__ = 'users'
 
     id = Column(
@@ -31,6 +27,10 @@ class User(Base, UserMixin):
         String(60),
         nullable=False
     )
+    is_confirmed = Column(
+        Boolean,
+        default=False
+    )
     user_pairs = relationship(
         'RandomPairs'
     )
@@ -38,11 +38,26 @@ class User(Base, UserMixin):
         'RandomPairsResults'
     )
 
+    def get_token(self, expires_sec=1800):
+        serializer = Serializer(current_app.config['SECRET_KEY'], expires_sec)
+        return serializer.dumps({
+            'user_id': self.id
+        }).decode('utf-8')
+
+    @staticmethod
+    def verify_token(token):
+        serializer = Serializer(current_app.config['SECRET_KEY'])
+        try:
+            verified_user = serializer.loads(token)['user_id']
+        except Exception:
+            return None
+        return SessionFactory.session.query(User).get(verified_user)
+
     def __repr__(self):
         return f'User({self.username},{self.email})'
 
 
-class RandomPairs(Base):
+class RandomPairs(SessionFactory.Base):
     __tablename__ = 'RandomPairs'
 
     id = Column(
@@ -68,7 +83,7 @@ class RandomPairs(Base):
         return f'RandomPairs({self.random_person_name}, {self.random_person_email})'
 
 
-class RandomPairsResults(Base):
+class RandomPairsResults(SessionFactory.Base):
     __tablename__ = 'randomPairResults'
 
     id = Column(
@@ -87,12 +102,7 @@ class RandomPairsResults(Base):
     )
 
     def __repr__(self):
-        return f'RandomPairsResults({self.results})'
+        return f'Results({self.results})'
 
 
-@login_manager.user_loader
-def load_user(user_id):
-    return session.query(User).get(int(user_id))
-
-
-Base.metadata.create_all(engine)
+SessionFactory.Base.metadata.create_all(SessionFactory.engine)
