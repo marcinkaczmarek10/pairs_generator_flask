@@ -32,7 +32,7 @@ class User(SessionFactory.Base, UserMixin):
         default=False
     )
     user_pairs = relationship(
-        'RandomPairs'
+        'RandomPerson'
     )
     user_results = relationship(
         'RandomPairsResults'
@@ -57,8 +57,8 @@ class User(SessionFactory.Base, UserMixin):
         return f'User({self.username},{self.email})'
 
 
-class RandomPairs(SessionFactory.Base):
-    __tablename__ = 'RandomPairs'
+class RandomPerson(SessionFactory.Base):
+    __tablename__ = 'RandomPerson'
 
     id = Column(
         Integer,
@@ -80,7 +80,7 @@ class RandomPairs(SessionFactory.Base):
     )
 
     def __repr__(self):
-        return f'RandomPairs({self.random_person_name}, {self.random_person_email})'
+        return f'RandomPerson({self.random_person_name}, {self.random_person_email})'
 
 
 class RandomPairsResults(SessionFactory.Base):
@@ -103,6 +103,31 @@ class RandomPairsResults(SessionFactory.Base):
 
     def __repr__(self):
         return f'Results({self.results})'
+
+
+class RandomPair(SessionFactory.Base):
+    __tablename__ = 'randomPairs'
+
+    id = Column(
+        Integer,
+        primary_key=True
+    )
+    first_person_name = Column(
+        String(20),
+        nullable=False
+    )
+    first_person_email = Column(
+        String(120),
+        nullable=False
+    )
+    second_person_name = Column(
+        String(20),
+        nullable=False
+    )
+    second_person_email = Column(
+        String(120),
+        nullable=False
+    )
 
 
 SessionFactory.Base.metadata.create_all(SessionFactory.engine)

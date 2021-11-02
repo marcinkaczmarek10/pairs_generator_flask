@@ -2,7 +2,7 @@
 import json
 from flask import jsonify, url_for, abort
 from website.database.DB import SessionFactory, SessionContextManager
-from website.database.models import RandomPairsResults, RandomPairs
+from website.database.models import RandomPairsResults, RandomPerson
 from flask import Blueprint
 from website.generate_pairs.generate_random_pairs import generate_random_pairs, RandomPerson
 
@@ -24,7 +24,7 @@ def get_results(user_id):
 
 @api.route('/pairs/<user_id>')
 def get_user_pairs(user_id):
-    query = SessionFactory.session.query(RandomPairs).filter_by(user_id=user_id).all()
+    query = SessionFactory.session.query(RandomPerson).filter_by(user_id=user_id).all()
     user_pairs = []
     for pair in query:
         user_pairs.append(pair.results)
@@ -53,7 +53,7 @@ def post_generate_pairs(user_id, user_pairs):
         )
         with SessionContextManager as sessionCM:
             sessionCM.add(user_random_pairs)
-            sessionCM.query(RandomPairs).filter_by(user_id=user_id).delete()
+            sessionCM.query(RandomPerson).filter_by(user_id=user_id).delete()
 
         get_results_url = url_for('api.get_results', user_id=user_id)
         return jsonify({
