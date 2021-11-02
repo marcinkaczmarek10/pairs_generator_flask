@@ -2,7 +2,7 @@ from flask import Blueprint, render_template, flash, redirect, request, jsonify
 from flask_login import current_user, login_required
 from website.forms.GenerateRandomPairs import GenerateRandomPairsForm
 from website.database.DB import SessionFactory, SessionContextManager
-from website.database.models import RandomPairs, RandomPairsResults
+from website.database.models import RandomPerson, RandomPairsResults
 from website.generate_pairs.generate_random_pairs import RandomPerson, generate_random_pairs
 import json
 
@@ -16,7 +16,7 @@ def pairs():
     form = GenerateRandomPairsForm()
 
     if form.validate_on_submit():
-        random_person = RandomPairs(
+        random_person = RandomPerson(
             random_person_name=form.random_person_name.data,
             random_person_email=form.random_person_email.data,
             user_id=current_user.id
@@ -28,7 +28,7 @@ def pairs():
         return redirect('/generate-pairs')
 
     user_pair = SessionFactory.session.query(
-        RandomPairs).filter_by(user_id=current_user.id).all()
+        RandomPerson).filter_by(user_id=current_user.id).all()
 
     return render_template(
         'generate_pairs.html',
@@ -42,7 +42,7 @@ def pairs():
 @login_required
 def delete_pair():
     pair = SessionFactory.session.query(
-        RandomPairs).filter_by(user_id=current_user.id).order_by(RandomPairs.id.desc()).first()
+        RandomPerson).filter_by(user_id=current_user.id).order_by(RandomPerson.id.desc()).first()
 
     if pair:
         with SessionContextManager as sessionCM:
@@ -58,7 +58,7 @@ def delete_pair():
 @login_required
 def results():
     user_random_person_pool = SessionFactory.session.query(
-        RandomPairs).filter_by(user_id=current_user.id).all()
+        RandomPerson).filter_by(user_id=current_user.id).all()
 
     if len(user_random_person_pool) > 1:
         random_person_pool = []
@@ -76,7 +76,7 @@ def results():
 
         with SessionContextManager() as sessionCM:
             sessionCM.add(user_random_pairs)
-            SessionFactory.session.query(RandomPairs).filter_by(user_id=current_user.id).delete()
+            SessionFactory.session.query(RandomPerson).filter_by(user_id=current_user.id).delete()
 
         return redirect('/show-results')
 

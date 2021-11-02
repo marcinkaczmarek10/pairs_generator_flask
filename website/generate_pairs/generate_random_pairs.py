@@ -1,11 +1,12 @@
 from random import choice
 import json
+from dataclasses import dataclass
 
 
+@dataclass
 class RandomPerson:
-    def __init__(self, name: str, email: str):
-        self.name = name
-        self.email = email
+    name: str
+    email: str
 
     def __repr__(self):
         return f'({self.name}, {self.email})'
