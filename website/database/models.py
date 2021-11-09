@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, Boolean
+from sqlalchemy import Column, Integer, String, ForeignKey, Boolean, Table
 from sqlalchemy.orm import relationship
 from flask_login import UserMixin
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
@@ -128,6 +128,27 @@ class RandomPair(SessionFactory.Base):
         String(120),
         nullable=False
     )
+
+
+class DrawCount(SessionFactory.Base):
+    __tablename__ = "drawCount"
+
+    id = Column(
+        Integer,
+        primary_key=True
+    )
+    user_id = Column(
+        Integer,
+        ForeignKey(
+            'users.id'
+        )
+    )
+
+
+association_table = Table('association', SessionFactory.Base.metadata,
+    Column('count_id', ForeignKey('drawCount.id'), primary_key=True),
+    Column('pair_id', ForeignKey('randomPairs.id'), primary_key=True)
+)
 
 
 SessionFactory.Base.metadata.create_all(SessionFactory.engine)
