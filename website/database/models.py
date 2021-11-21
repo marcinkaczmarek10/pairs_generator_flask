@@ -145,10 +145,9 @@ class DrawCount(SessionFactory.Base):
     )
 
 
+SessionFactory.Base.metadata.create_all(SessionFactory.engine)
+
 association_table = Table('association', SessionFactory.Base.metadata,
     Column('count_id', ForeignKey('drawCount.id'), primary_key=True),
     Column('pair_id', ForeignKey('randomPairs.id'), primary_key=True)
 )
-
-
-SessionFactory.Base.metadata.create_all(SessionFactory.engine)
