@@ -3,7 +3,7 @@ from flask_login import current_user, login_required
 from website.forms.GenerateRandomPairs import GenerateRandomPairsForm
 from website.database.DB import SessionFactory, SessionContextManager
 from website.database.models import RandomPerson, RandomPairsResults
-from website.generate_pairs.generate_random_pairs import RandomPerson, generate_random_pairs
+from website.generate_pairs.generate_random_pairs import Person, generate_random_pairs
 import json
 
 
@@ -45,7 +45,7 @@ def delete_pair():
         RandomPerson).filter_by(user_id=current_user.id).order_by(RandomPerson.id.desc()).first()
 
     if pair:
-        with SessionContextManager as sessionCM:
+        with SessionContextManager() as sessionCM:
             sessionCM.delete(pair)
 
         return redirect('/generate-pairs')
@@ -65,7 +65,7 @@ def results():
 
         for row in user_random_person_pool:
             random_person_pool.append(
-                RandomPerson(row.random_person_name, row.random_person_email)
+                Person(row.random_person_name, row.random_person_email)
             )
 
         user_results = generate_random_pairs(random_person_pool)

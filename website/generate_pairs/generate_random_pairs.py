@@ -4,7 +4,7 @@ from dataclasses import dataclass
 
 
 @dataclass
-class RandomPerson:
+class Person:
     name: str
     email: str
 
