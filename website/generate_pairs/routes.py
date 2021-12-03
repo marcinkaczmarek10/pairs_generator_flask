@@ -2,7 +2,7 @@ from flask import Blueprint, render_template, flash, redirect, request, jsonify
 from flask_login import current_user, login_required
 from website.forms.GenerateRandomPairs import GenerateRandomPairsForm
 from website.database.DB import SessionFactory, SessionContextManager
-from website.database.models import RandomPerson, RandomPairsResults
+from website.database.models import RandomPerson, RandomPairsResults, RandomPair, DrawCount
 from website.generate_pairs.generate_random_pairs import Person, generate_random_pairs
 import json
 
@@ -69,14 +69,26 @@ def results():
             )
 
         user_results = generate_random_pairs(random_person_pool)
-        user_random_pairs = RandomPairsResults(
-            results=user_results,
-            user_id=current_user.id
-        )
+        draw_count = DrawCount(user_id=current_user.id)
 
         with SessionContextManager() as sessionCM:
-            sessionCM.add(user_random_pairs)
-            SessionFactory.session.query(RandomPerson).filter_by(user_id=current_user.id).delete()
+            sessionCM.add(draw_count)
+
+        is_draw_count = SessionFactory.session.query(
+                    DrawCount).filter_by(user_id=current_user.id).order_by(DrawCount.id.desc()).first()
+        if is_draw_count:
+            for [first_person, second_person] in user_results:
+                user_random_pairs = RandomPair(
+                    first_person_name=first_person.name,
+                    first_person_email=first_person.email,
+                    second_person_name=second_person.name,
+                    second_person_email=second_person.email,
+                    draw_count=is_draw_count.id
+                )
+                with SessionContextManager() as sessionCM:
+                   sessionCM.add(user_random_pairs)
+
+        SessionFactory.session.query(RandomPerson).filter_by(user_id=current_user.id).delete()
 
         return redirect('/show-results')
 
@@ -88,23 +100,12 @@ def results():
 @login_required
 def show_results():
     user_random_pairs_result = SessionFactory.session.query(
-        RandomPairsResults).filter_by(user_id=current_user.id).all()
+        RandomPair, DrawCount).join(DrawCount).all()
 
-    flat_results = [result.results for result in user_random_pairs_result]
-    results = [eval(result) for result in flat_results]
-    user_id = [result.id for result in user_random_pairs_result]
-
-    random_results = []
-    # for pairs in results:
-    #     for (buyer, recipient)  in pairs:
-    #         for (buyer_name, buyer_email, recipient_name, recipient_email) in (buyer, recipient):
-    #             random_results.append([RandomPerson(buyer_name, buyer_email), RandomPerson(recipient_name, recipient_email)])
-    # print(random_results)
 
     return render_template(
         'results.html',
-        user_random_pairs_result=user_random_pairs_result,
-        user_id=user_id
+        user_random_pairs_result=user_random_pairs_result
     )
 
 

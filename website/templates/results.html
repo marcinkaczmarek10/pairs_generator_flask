@@ -4,10 +4,10 @@
     <legend class="border-bottom mb-4">Results</legend>
     <div class="form-group">
          <ul class="list-group list-group-flush">
-             {% for pairs in user_random_pairs_result %}
+             {% for pairs, draws in user_random_pairs_result %}
              <div class="form-group">
                  <li class="list-group-item list-group-flush">
-                     {{ pairs.results}}
+                     {{pairs.first_person_name, draws.id}}
                      <button type="button" class="close" onclick="deleteResult({{ id }})">
                          <span aria-hidden="true">
                              &times;
