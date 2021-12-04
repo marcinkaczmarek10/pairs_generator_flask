@@ -100,12 +100,17 @@ def results():
 @login_required
 def show_results():
     user_random_pairs_result = SessionFactory.session.query(
-        RandomPair, DrawCount).join(DrawCount).all()
+        RandomPair, DrawCount).join(DrawCount).filter_by(user_id=current_user.id).all()
+
+    user_draws = SessionFactory.session.query(DrawCount).filter_by(user_id=current_user.id).all()
+
+    #user_results =
 
 
     return render_template(
         'results.html',
-        user_random_pairs_result=user_random_pairs_result
+        user_random_pairs_result=user_random_pairs_result,
+        user_draws=user_draws
     )
 
 
