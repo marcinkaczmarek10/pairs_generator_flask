@@ -5,6 +5,8 @@ from website.database.DB import SessionFactory, SessionContextManager
 from website.database.models import RandomPerson, RandomPairsResults, RandomPair, DrawCount
 from website.generate_pairs.generate_random_pairs import Person, generate_random_pairs
 import json
+import itertools
+import operator
 
 
 generate_pairs = Blueprint('generate_pairs', __name__)
@@ -100,16 +102,19 @@ def results():
 @login_required
 def show_results():
     user_random_pairs_result = SessionFactory.session.query(
-        RandomPair, DrawCount).join(DrawCount).filter_by(user_id=current_user.id).all()
+        RandomPair).outerjoin(
+        DrawCount, RandomPair.draw_count == DrawCount.id).filter(
+        DrawCount.user_id == current_user.id).all()
 
     user_draws = SessionFactory.session.query(DrawCount).filter_by(user_id=current_user.id).all()
 
-    #user_results =
-
+    get_attr = operator.attrgetter('draw_count')
+    sorted_results = sorted(user_random_pairs_result, key=get_attr)
+    new_results = [list(g) for k, g in itertools.groupby(sorted_results, get_attr)]
 
     return render_template(
         'results.html',
-        user_random_pairs_result=user_random_pairs_result,
+        user_random_pairs_result=new_results,
         user_draws=user_draws
     )
 
@@ -118,6 +123,7 @@ def show_results():
 @login_required
 def delete_result():
     result_to_delete = json.loads(request.data)
+    print(result_to_delete)
     result_id = result_to_delete['result_id']
     result_query = SessionFactory.session.query(RandomPairsResults).get(result_id)
 
