@@ -4,7 +4,7 @@ from flask import jsonify, url_for, abort
 from website.database.DB import SessionFactory, SessionContextManager
 from website.database.models import RandomPairsResults, RandomPerson
 from flask import Blueprint
-from website.generate_pairs.generate_random_pairs import generate_random_pairs, RandomPerson
+from website.generate_pairs.generate_random_pairs import generate_random_pairs, Person
 
 api = Blueprint('api', __name__)
 
@@ -44,7 +44,7 @@ def post_generate_pairs(user_id, user_pairs):
     if len(user_random_people_pool) > 1:
 
         random_people_pool = [
-            RandomPerson(row.random_person_name, row.random_person_email) for row in user_random_people_pool
+            Person(row.random_person_name, row.random_person_email) for row in user_random_people_pool
         ]
         user_results = generate_random_pairs(random_people_pool)
         user_random_pairs = RandomPairsResults(
