@@ -4,7 +4,7 @@ from dataclasses import dataclass
 
 
 @dataclass
-class RandomPerson:
+class Person:
     name: str
     email: str
 
@@ -36,9 +36,5 @@ def _generate_random_pairs(random_people) -> list:
 
 def generate_random_pairs(random_person_pool):
     random_pairs = _generate_random_pairs(random_person_pool)
-    pairs_list = []
 
-    for [person_one, person_two] in random_pairs:
-        pairs_list.append([f'{person_one.name}, {person_one.email}', f'{person_two.name}, {person_two.email}'])
-
-    return json.dumps(pairs_list)
+    return random_pairs

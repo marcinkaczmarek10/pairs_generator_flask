@@ -35,7 +35,7 @@ class User(SessionFactory.Base, UserMixin):
         'RandomPerson'
     )
     user_results = relationship(
-        'RandomPairsResults'
+        'DrawCount'
     )
 
     def get_token(self, expires_sec=1800):
@@ -94,15 +94,27 @@ class RandomPairsResults(SessionFactory.Base):
         String(500),
         nullable=False
     )
+
+    def __repr__(self):
+        return f'Results({self.results})'
+
+
+class DrawCount(SessionFactory.Base):
+    __tablename__ = "drawCount"
+
+    id = Column(
+        Integer,
+        primary_key=True
+    )
     user_id = Column(
         Integer,
         ForeignKey(
             'users.id'
         )
     )
-
-    def __repr__(self):
-        return f'Results({self.results})'
+    draw_pairs = relationship(
+        'RandomPair'
+    )
 
 
 class RandomPair(SessionFactory.Base):
@@ -128,27 +140,12 @@ class RandomPair(SessionFactory.Base):
         String(120),
         nullable=False
     )
-
-
-class DrawCount(SessionFactory.Base):
-    __tablename__ = "drawCount"
-
-    id = Column(
-        Integer,
-        primary_key=True
-    )
-    user_id = Column(
+    draw_count = Column(
         Integer,
         ForeignKey(
-            'users.id'
+            'drawCount.id'
         )
     )
-
-
-association_table = Table('association', SessionFactory.Base.metadata,
-    Column('count_id', ForeignKey('drawCount.id'), primary_key=True),
-    Column('pair_id', ForeignKey('randomPairs.id'), primary_key=True)
-)
 
 
 SessionFactory.Base.metadata.create_all(SessionFactory.engine)
