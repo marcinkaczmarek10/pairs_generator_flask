@@ -4,6 +4,13 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
 
+
+if os.environ.get('ENV') == 'PRODUCTION':
+    database_uri = os.environ.get('DATABASE_URL')
+else:
+    database_uri = 'sqlite:///generatePairsDB.db'
+
+
 class ConnectionWithDataBaseError(Exception):
     pass
 
@@ -13,9 +20,8 @@ class NoTableFoundError(Exception):
 
 
 class SessionFactory:
-    database_uri = os.environ.get('DATABASE_URI')
     engine = create_engine(
-        'sqlite:///generatePairsDB.db',
+        database_uri,
         connect_args={"check_same_thread": False}
     )
     Session = sessionmaker(bind=engine, expire_on_commit=False)

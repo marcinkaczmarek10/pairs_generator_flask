@@ -12,6 +12,7 @@ class Config:
 
 class DevelopConfig(Config):
     DEBUG = True
+    SECRET_KEY = 'secret_key'
 
 
 class ProductionConfig(Config):
