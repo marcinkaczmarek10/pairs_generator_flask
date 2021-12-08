@@ -1,11 +1,11 @@
 from flask import Flask
 from website.utils.login_manager import login_manager
-from website.config import DevelopConfig
+from website.config import Config
 from website.utils.email import mail
 from website.utils.data_serializers import marshmallow
 
 
-def create_app(config_name=DevelopConfig):
+def create_app(config_name=Config):
     app = Flask(__name__)
     app.config.from_object(config_name)
     login_manager.init_app(app)
