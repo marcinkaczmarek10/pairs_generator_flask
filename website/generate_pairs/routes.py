@@ -7,6 +7,7 @@ from website.generate_pairs.generate_random_pairs import Person, generate_random
 import json
 import itertools
 import operator
+from website.utils.data_serializers import ResultSchema
 
 
 generate_pairs = Blueprint('generate_pairs', __name__)
@@ -88,7 +89,7 @@ def results():
                     draw_count=is_draw_count.id
                 )
                 with SessionContextManager() as sessionCM:
-                   sessionCM.add(user_random_pairs)
+                    sessionCM.add(user_random_pairs)
 
         SessionFactory.session.query(RandomPerson).filter_by(user_id=current_user.id).delete()
 
@@ -111,24 +112,34 @@ def show_results():
     get_attr = operator.attrgetter('draw_count')
     sorted_results = sorted(user_random_pairs_result, key=get_attr)
     new_results = [list(g) for k, g in itertools.groupby(sorted_results, get_attr)]
+    schema = ResultSchema(many=True)
+    test = schema.dump(user_random_pairs_result)
+    item_getter = operator.itemgetter('draw_count')
+    sorted_test = sorted(test, key=item_getter)
+    grouped_test = [list(g) for k, g in itertools.groupby(sorted_test, item_getter)]
+    json_test = json.dumps(grouped_test)
+
+
 
     return render_template(
         'results.html',
         user_random_pairs_result=new_results,
-        user_draws=user_draws
+        user_draws=user_draws,
+        test=grouped_test
     )
 
 
 @generate_pairs.route('/delete-result', methods=['POST'])
-@login_required
 def delete_result():
-    result_to_delete = json.loads(request.data)
+    result_to_delete = request.get_data().decode('utf-8')
+    if_json = json.loads(result_to_delete)
     print(result_to_delete)
-    result_id = result_to_delete['result_id']
-    result_query = SessionFactory.session.query(RandomPairsResults).get(result_id)
+    print(if_json)
+    #result_id = result_to_delete['result_id']
+    #result_query = SessionFactory.session.query(RandomPairsResults).get(result_id)
 
-    if result_query and result_query.user_id == current_user.id:
-        with SessionContextManager() as sessionCM:
-            sessionCM.delete(result_query)
+    #if result_query and result_query.user_id == current_user.id:
+       # with SessionContextManager() as sessionCM:
+          #  sessionCM.delete(result_query)
 
-        return jsonify({})
+    return redirect('show-results')
