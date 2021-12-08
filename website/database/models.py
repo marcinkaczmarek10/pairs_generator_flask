@@ -14,7 +14,7 @@ class User(SessionFactory.Base, UserMixin):
         primary_key=True
     )
     username = Column(
-        String(20),
+        String(40),
         unique=True,
         nullable=False
     )
@@ -24,7 +24,7 @@ class User(SessionFactory.Base, UserMixin):
         nullable=False
     )
     password = Column(
-        String(60),
+        String(100),
         nullable=False
     )
     is_confirmed = Column(
@@ -65,7 +65,7 @@ class RandomPerson(SessionFactory.Base):
         primary_key=True
     )
     random_person_name = Column(
-        String(20),
+        String(40),
         nullable=False
     )
     random_person_email = Column(
@@ -125,7 +125,7 @@ class RandomPair(SessionFactory.Base):
         primary_key=True
     )
     first_person_name = Column(
-        String(20),
+        String(40),
         nullable=False
     )
     first_person_email = Column(
@@ -133,7 +133,7 @@ class RandomPair(SessionFactory.Base):
         nullable=False
     )
     second_person_name = Column(
-        String(20),
+        String(40),
         nullable=False
     )
     second_person_email = Column(
