@@ -1,15 +1,22 @@
-from website.database.DB import SessionFactory
-from website.database.models import RandomPairsResults
-from flask_login import current_user
+from flask_marshmallow import Marshmallow
+from website.database.models import RandomPair
 
-def data_serializer():
-    user_random_pairs_result = SessionFactory.session.query(
-        RandomPairsResults).filter_by(user_id=current_user.id).all()
 
-    flat_results = [result.results for result in user_random_pairs_result]
-    print(user_random_pairs_result)
-    print(type(user_random_pairs_result))
-    flatter_results = user_random_pairs_result.strip('][').split(', ')
-    print(flatter_results)
+marshmallow = Marshmallow()
 
-data_serializer()
+
+class ResultSchema(marshmallow.SQLAlchemyAutoSchema):
+    class Meta:
+        model = RandomPair
+        include_fk = True
+
+
+
+
+
+
+
+      #  fields = (
+     #       'id', 'first_person_name', 'first_person_email',
+      #      'second_person_email', 'second_person_email', 'draw_count'
+       # )
