@@ -1,12 +1,14 @@
 import os
+import re
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
 
-
 if os.environ.get('ENV') == 'PRODUCTION':
     database_uri = os.environ.get('DATABASE_URL')
+    if database_uri.startswith("postgres://"):
+        database_uri = database_uri.replace("postgres://", "postgresql://", 1)
 else:
     database_uri = 'sqlite:///generatePairsDB.db'
 
