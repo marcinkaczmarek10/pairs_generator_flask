@@ -92,7 +92,8 @@ def results():
                 with SessionContextManager() as sessionCM:
                     sessionCM.add(user_random_pairs)
 
-        SessionFactory.session.query(RandomPerson).filter_by(user_id=current_user.id).delete()
+        with SessionContextManager():
+            SessionFactory.session.query(RandomPerson).filter_by(user_id=current_user.id).delete()
 
         return redirect('/show-results')
 
