@@ -88,8 +88,8 @@ def register():
 
 @auth.route('/reset-password', methods=['GET', 'POST'])
 def reset_password_submit():
-    if current_user.is_authenticated:
-        return redirect('/')
+    #if current_user.is_authenticated:
+        #return redirect('/')
     form = ResetPasswordSubmitForm()
     if form.validate_on_submit():
         verified_user = SessionFactory.session.query(User).filter_by(email=form.email.data).first()

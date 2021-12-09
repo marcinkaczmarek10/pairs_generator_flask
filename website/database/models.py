@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, Boolean, Table
+from sqlalchemy import Column, Integer, String, ForeignKey, Boolean
 from sqlalchemy.orm import relationship
 from flask_login import UserMixin
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
@@ -81,22 +81,6 @@ class RandomPerson(SessionFactory.Base):
 
     def __repr__(self):
         return f'RandomPerson({self.random_person_name}, {self.random_person_email})'
-
-
-class RandomPairsResults(SessionFactory.Base):
-    __tablename__ = 'randomPairResults'
-
-    id = Column(
-        Integer,
-        primary_key=True
-    )
-    results = Column(
-        String(500),
-        nullable=False
-    )
-
-    def __repr__(self):
-        return f'Results({self.results})'
 
 
 class DrawCount(SessionFactory.Base):
