@@ -1,12 +1,14 @@
 import os
+import re
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
 
-
 if os.environ.get('ENV') == 'PRODUCTION':
     database_uri = os.environ.get('DATABASE_URL')
+    if database_uri.startswith('postgres://'):
+        database_uri = database_uri.replace('postgres://', 'postgresql://', 1)
 else:
     database_uri = 'sqlite:///generatePairsDB.db'
 
@@ -21,8 +23,7 @@ class NoTableFoundError(Exception):
 
 class SessionFactory:
     engine = create_engine(
-        database_uri,
-        connect_args={"check_same_thread": False}
+        database_uri  # connect_args={"check_same_thread": False}
     )
     Session = sessionmaker(bind=engine, expire_on_commit=False)
     Base = declarative_base()

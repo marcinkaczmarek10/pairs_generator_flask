@@ -1,12 +1,13 @@
+import json
+import itertools
+import operator
 from flask import Blueprint, render_template, flash, redirect, request, jsonify
 from flask_login import current_user, login_required
 from website.forms.GenerateRandomPairs import GenerateRandomPairsForm
 from website.database.DB import SessionFactory, SessionContextManager
-from website.database.models import RandomPerson, RandomPairsResults, RandomPair, DrawCount
+from website.database.models import RandomPerson, RandomPair, DrawCount
 from website.generate_pairs.generate_random_pairs import Person, generate_random_pairs
-import json
-import itertools
-import operator
+from website.utils.email import send_mail_to_pairs, MailError
 from website.utils.data_serializers import ResultSchema
 
 
@@ -107,39 +108,41 @@ def show_results():
         DrawCount, RandomPair.draw_count == DrawCount.id).filter(
         DrawCount.user_id == current_user.id).all()
 
-    user_draws = SessionFactory.session.query(DrawCount).filter_by(user_id=current_user.id).all()
-
-    get_attr = operator.attrgetter('draw_count')
-    sorted_results = sorted(user_random_pairs_result, key=get_attr)
-    new_results = [list(g) for k, g in itertools.groupby(sorted_results, get_attr)]
     schema = ResultSchema(many=True)
-    test = schema.dump(user_random_pairs_result)
+    pretty_result = schema.dump(user_random_pairs_result)
     item_getter = operator.itemgetter('draw_count')
-    sorted_test = sorted(test, key=item_getter)
-    grouped_test = [list(g) for k, g in itertools.groupby(sorted_test, item_getter)]
-    json_test = json.dumps(grouped_test)
-
-
+    sorted_pretty_result = sorted(pretty_result, key=item_getter)
+    grouped_result = [list(g) for k, g in itertools.groupby(sorted_pretty_result, item_getter)]
 
     return render_template(
         'results.html',
-        user_random_pairs_result=new_results,
-        user_draws=user_draws,
-        test=grouped_test
+        result=grouped_result
     )
 
 
 @generate_pairs.route('/delete-result', methods=['POST'])
 def delete_result():
-    result_to_delete = request.get_data().decode('utf-8')
-    if_json = json.loads(result_to_delete)
-    print(result_to_delete)
-    print(if_json)
-    #result_id = result_to_delete['result_id']
-    #result_query = SessionFactory.session.query(RandomPairsResults).get(result_id)
+    req = request.get_data().decode('utf-8')
+    req_json = json.loads(req)
 
-    #if result_query and result_query.user_id == current_user.id:
-       # with SessionContextManager() as sessionCM:
-          #  sessionCM.delete(result_query)
+    if req_json:
+        for result in req_json:
+            result_query = SessionFactory.session.query(RandomPair).get(result['id'])
+            print(result_query)
+            with SessionContextManager() as sessionCM:
+                sessionCM.delete(result_query)
 
-    return redirect('show-results')
+    return jsonify({}, 200)
+
+
+@generate_pairs.route('/submit-result', methods=['POST'])
+def submit_result():
+    req = request.get_data().decode('utf-8')
+    req_json = json.loads(req)
+    try:
+        send_mail_to_pairs(req_json)
+        flash('Emails have been sent!', 'info')
+    except MailError:
+        flash('Something went wrong!', 'danger')
+
+    return jsonify({}, 200)
