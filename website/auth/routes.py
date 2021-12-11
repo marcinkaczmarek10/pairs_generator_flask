@@ -15,11 +15,9 @@ auth = Blueprint('auth', __name__)
 @auth.route('/login', methods=['GET', 'POST'])
 def login():
     if current_user.is_authenticated:
-
         return redirect('/')
 
     form = LoginForm()
-
     if form.validate_on_submit():
         user = SessionFactory.session.query(User).filter_by(email=form.email.data).first()
 
@@ -27,6 +25,7 @@ def login():
             login_user(user, remember=form.remember.data)
             redirect_page = request.args.get('next')
             flash('You have been logged in', 'success')
+            print(user.id)
 
             return redirect(redirect_page) if redirect_page else redirect('/')
 
@@ -88,8 +87,8 @@ def register():
 
 @auth.route('/reset-password', methods=['GET', 'POST'])
 def reset_password_submit():
-    #if current_user.is_authenticated:
-        #return redirect('/')
+    if current_user.is_authenticated:
+        return redirect('/')
     form = ResetPasswordSubmitForm()
     if form.validate_on_submit():
         verified_user = SessionFactory.session.query(User).filter_by(email=form.email.data).first()

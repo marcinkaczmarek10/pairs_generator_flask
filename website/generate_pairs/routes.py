@@ -1,7 +1,7 @@
 import json
 import itertools
 import operator
-from flask import Blueprint, render_template, flash, redirect, request, jsonify
+from flask import Blueprint, render_template, flash, redirect, request, jsonify, url_for
 from flask_login import current_user, login_required
 from website.forms.GenerateRandomPairs import GenerateRandomPairsForm
 from website.database.DB import SessionFactory, SessionContextManager
@@ -9,6 +9,7 @@ from website.database.models import RandomPerson, RandomPair, DrawCount
 from website.generate_pairs.generate_random_pairs import Person, generate_random_pairs
 from website.utils.email import send_mail_to_pairs, MailError
 from website.utils.data_serializers import ResultSchema
+from website.utils.forms import SubmitSendingEmail
 
 
 generate_pairs = Blueprint('generate_pairs', __name__)
@@ -65,13 +66,9 @@ def results():
         RandomPerson).filter_by(user_id=current_user.id).all()
 
     if len(user_random_person_pool) > 1:
-        random_person_pool = []
-
-        for row in user_random_person_pool:
-            random_person_pool.append(
-                Person(row.random_person_name, row.random_person_email)
-            )
-
+        random_person_pool = [
+            Person(row.random_person_name, row.random_person_email) for row in user_random_person_pool
+        ]
         user_results = generate_random_pairs(random_person_pool)
         draw_count = DrawCount(user_id=current_user.id)
 
@@ -122,6 +119,7 @@ def show_results():
 
 
 @generate_pairs.route('/delete-result', methods=['POST'])
+@login_required
 def delete_result():
     req = request.get_data().decode('utf-8')
     req_json = json.loads(req)
@@ -137,13 +135,23 @@ def delete_result():
 
 
 @generate_pairs.route('/submit-result', methods=['POST'])
+@login_required
 def submit_result():
     req = request.get_data().decode('utf-8')
-    req_json = json.loads(req)
-    try:
-        send_mail_to_pairs(req_json)
-        flash('Emails have been sent!', 'info')
-    except MailError:
-        flash('Something went wrong!', 'danger')
+    return submit_sending_emails(req)
 
-    return jsonify({}, 200)
+
+@generate_pairs.route('/submit-sending-email', methods=['GET', 'POST'])
+@login_required
+def submit_sending_emails(req_json):
+    #req_json = request.get_data().decode('utf-8')
+    req = json.loads(req_json)
+    form = SubmitSendingEmail()
+    if form.validate_on_submit():
+        try:
+            send_mail_to_pairs(req, form.email_body.data)
+            flash('Emails have been sent!', 'info')
+        except MailError:
+            flash('Something went wrong!', 'danger')
+
+    return render_template('submit_sending_email.html', form=form)
