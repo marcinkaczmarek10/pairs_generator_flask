@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField
-from wtforms.validators import DataRequired, Length
+from wtforms import StringField, PasswordField, SubmitField
+from wtforms.validators import DataRequired, Length, EqualTo
 
 
 class SubmitSendingEmail(FlaskForm):
@@ -13,4 +13,23 @@ class SubmitSendingEmail(FlaskForm):
     )
     submit = SubmitField(
         'Submit'
+    )
+
+
+class UpdatePassword(FlaskForm):
+    password = PasswordField(
+        'New Password',
+        validators=[
+            DataRequired()
+        ]
+    )
+    confirm_password = PasswordField(
+        'Confirm Password',
+        validators=[
+            DataRequired(),
+            EqualTo('password')
+        ]
+    )
+    submit = SubmitField(
+        'Update Password'
     )

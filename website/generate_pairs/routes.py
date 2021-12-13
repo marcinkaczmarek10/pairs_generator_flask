@@ -1,9 +1,8 @@
 import json
 import itertools
 import operator
-
 import flask
-from flask import Blueprint, render_template, flash, redirect, request, jsonify, url_for
+from flask import Blueprint, render_template, flash, redirect, request, jsonify
 from flask_login import current_user, login_required
 from website.forms.GenerateRandomPairs import GenerateRandomPairsForm
 from website.database.DB import SessionFactory, SessionContextManager
@@ -77,8 +76,8 @@ def results():
         with SessionContextManager() as sessionCM:
             sessionCM.add(draw_count)
 
-        is_draw_count = SessionFactory.session.query(
-                    DrawCount).filter_by(user_id=current_user.id).order_by(DrawCount.id.desc()).first()
+        is_draw_count = SessionFactory.session.query(DrawCount).\
+            filter_by(user_id=current_user.id).order_by(DrawCount.id.desc()).first()
         if is_draw_count:
             for [first_person, second_person] in user_results:
                 user_random_pairs = RandomPair(
@@ -103,10 +102,9 @@ def results():
 @generate_pairs.route('/show-results')
 @login_required
 def show_results():
-    user_random_pairs_result = SessionFactory.session.query(
-        RandomPair).outerjoin(
-        DrawCount, RandomPair.draw_count == DrawCount.id).filter(
-        DrawCount.user_id == current_user.id).all()
+    user_random_pairs_result = SessionFactory.session.query(RandomPair).\
+        outerjoin(DrawCount, RandomPair.draw_count == DrawCount.id).\
+        filter(DrawCount.user_id == current_user.id).all()
 
     schema = ResultSchema(many=True)
     pretty_result = schema.dump(user_random_pairs_result)
@@ -147,23 +145,18 @@ def submit_result():
 @login_required
 def submit_sending_emails():
     form = SubmitSendingEmail()
-    is_req = []
     if flask.request.method == 'POST':
         req_json = request.get_data().decode('utf-8')
         req = json.loads(req_json)
-        is_req.append(req)
-    print(is_req)
-    if is_req == [] or len(is_req) > 1:
-        print(is_req)
-        is_req.clear()
-        return redirect('/')
-    for item in is_req:
-        if form.validate_on_submit():
-            try:
-                send_mail_to_pairs(item, form.email_body.data)
-                is_req.pop(item)
-                flash('Emails have been sent!', 'info')
-            except MailError:
-                flash('Something went wrong!', 'danger')
+        item_getter = operator.itemgetter('draw_count')
+        draw_id = set(map(item_getter, req))
+
+
+    if form.validate_on_submit():
+        try:
+            #send_mail_to_pairs()
+            flash('Emails have been sent!', 'info')
+        except MailError:
+            flash('Something went wrong!', 'danger')
 
     return render_template('submit_sending_email.html', form=form)
