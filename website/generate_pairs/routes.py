@@ -138,20 +138,21 @@ def delete_result():
 @login_required
 def submit_result():
     req = request.get_data().decode('utf-8')
-    return submit_sending_emails(req)
+    re_json = json.loads(req)
+    try:
+        send_mail_to_pairs(re_json)
+        flash('Emails have been sent!', 'info')
+        return jsonify({}), 200
+    except MailError:
+        flash('Something went wrong!', 'danger')
+        return jsonify({}), 500
 
 
 @generate_pairs.route('/submit-sending-email', methods=['GET', 'POST'])
 @login_required
-def submit_sending_emails(req_json):
-    #req_json = request.get_data().decode('utf-8')
-    req = json.loads(req_json)
+def submit_sending_emails():
     form = SubmitSendingEmail()
     if form.validate_on_submit():
-        try:
-            send_mail_to_pairs(req, form.email_body.data)
-            flash('Emails have been sent!', 'info')
-        except MailError:
-            flash('Something went wrong!', 'danger')
+        pass
 
     return render_template('submit_sending_email.html', form=form)

@@ -25,7 +25,6 @@ def login():
             login_user(user, remember=form.remember.data)
             redirect_page = request.args.get('next')
             flash('You have been logged in', 'success')
-            print(user.id)
 
             return redirect(redirect_page) if redirect_page else redirect('/')
 
