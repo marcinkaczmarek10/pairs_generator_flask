@@ -81,7 +81,7 @@ def send_mail_to_pairs(recipients):
             'Loteria świąteczna!',
             'random_pair_generator@post.com',
             [recipient['second_person_email']],
-            f'(Gratulacje{recipient["first_person_name"]}!\n Wylosowałeś:{recipient["second_person_name"]}!)'
+            f'Gratulacje {recipient["first_person_name"]}!\n Wylosowałeś:{recipient["second_person_name"]}!'
             f'\nPS: Martinez chuj ci w dupe frajerze'
         )
         SendMail.send_mail(message)
