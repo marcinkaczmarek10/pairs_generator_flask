@@ -1,6 +1,8 @@
 import json
 import itertools
 import operator
+
+import flask
 from flask import Blueprint, render_template, flash, redirect, request, jsonify, url_for
 from flask_login import current_user, login_required
 from website.forms.GenerateRandomPairs import GenerateRandomPairsForm
@@ -122,12 +124,12 @@ def show_results():
 @login_required
 def delete_result():
     req = request.get_data().decode('utf-8')
+    print(req)
     req_json = json.loads(req)
 
     if req_json:
         for result in req_json:
             result_query = SessionFactory.session.query(RandomPair).get(result['id'])
-            print(result_query)
             with SessionContextManager() as sessionCM:
                 sessionCM.delete(result_query)
 
@@ -143,15 +145,25 @@ def submit_result():
 
 @generate_pairs.route('/submit-sending-email', methods=['GET', 'POST'])
 @login_required
-def submit_sending_emails(req_json):
-    #req_json = request.get_data().decode('utf-8')
-    req = json.loads(req_json)
+def submit_sending_emails():
     form = SubmitSendingEmail()
-    if form.validate_on_submit():
-        try:
-            send_mail_to_pairs(req, form.email_body.data)
-            flash('Emails have been sent!', 'info')
-        except MailError:
-            flash('Something went wrong!', 'danger')
+    is_req = []
+    if flask.request.method == 'POST':
+        req_json = request.get_data().decode('utf-8')
+        req = json.loads(req_json)
+        is_req.append(req)
+    print(is_req)
+    if is_req == [] or len(is_req) > 1:
+        print(is_req)
+        is_req.clear()
+        return redirect('/')
+    for item in is_req:
+        if form.validate_on_submit():
+            try:
+                send_mail_to_pairs(item, form.email_body.data)
+                is_req.pop(item)
+                flash('Emails have been sent!', 'info')
+            except MailError:
+                flash('Something went wrong!', 'danger')
 
     return render_template('submit_sending_email.html', form=form)
