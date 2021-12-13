@@ -78,9 +78,10 @@ def send_verifiaction_mail(user):
 def send_mail_to_pairs(recipients):
     for recipient in recipients:
         message = SendMail.email_message(
-            'You have been picked',
+            'Loteria świąteczna!',
             'random_pair_generator@post.com',
             [recipient['second_person_email']],
-            f'({recipient["first_person_name"]} Has picked you {recipient["second_person_name"]}!/n)'
+            f'(Gratulacje{recipient["first_person_name"]}!\n Wylosowałeś:{recipient["second_person_name"]}!)'
+            f'\nPS: Martinez chuj ci w dupe frajerze'
         )
         SendMail.send_mail(message)
