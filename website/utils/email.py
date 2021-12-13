@@ -28,7 +28,7 @@ class SendMail:
 
     @staticmethod
     def send_mail(message):
-        #with app.app_contex():
+        #with app.app_context():
         mail.send(message)
 
 
@@ -36,7 +36,7 @@ def send_reset_password_mail(user):
     token = SendMail._get_token(user)
     message = SendMail.email_message(
         'Password reset for Random Pairs Generator',
-        'marcin16661@gmail.com',
+        'random_pair_generator@post.com',
         [user.email],
         f"""Click the link below to reset your password.
         {url_for(
@@ -57,7 +57,7 @@ def send_verifiaction_mail(user):
     token = SendMail._get_token(user)
     message = SendMail.email_message(
         'Email confirmation for Random Pairs Generator',
-        'plebania@random-pairs-generator.herokuapp.com',
+        'random_pair_generator@post.com',
         [user.email],
         f"""Click the link below to confirm your email.
             {url_for(
@@ -79,8 +79,8 @@ def send_mail_to_pairs(recipients):
     for recipient in recipients:
         message = SendMail.email_message(
             'You have been picked',
-            recipient['first_person_email'],
+            'random_pair_generator@post.com',
             [recipient['second_person_email']],
-            'placeholder'
+            f'({recipient["first_person_name"]} Has picked you {recipient["second_person_name"]}!/n)'
         )
         SendMail.send_mail(message)

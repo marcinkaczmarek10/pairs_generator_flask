@@ -135,3 +135,4 @@ bin
 pyvenv.cfg
 *.db
 include
+*.db-journal
