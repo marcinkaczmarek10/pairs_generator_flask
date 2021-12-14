@@ -124,7 +124,7 @@ def reset_password(token):
         }
         with SessionContextManager():
             SessionFactory.session.query(User).\
-                filter_by(id=verified_user).update(user_new_password)
+                filter_by(id=verified_user.id).update(user_new_password)
         flash('Password Updated!', 'success')
         return redirect('/login')
 
@@ -144,7 +144,7 @@ def confirm_email(token):
 
     if verified_user:
         with SessionContextManager():
-            SessionFactory.session.query(User).filter_by(id=verified_user).\
+            SessionFactory.session.query(User).filter_by(id=verified_user.id).\
                 update({User.is_confirmed: True})
             flash('Your email has been confirmed.', 'info')
             return redirect('/login')

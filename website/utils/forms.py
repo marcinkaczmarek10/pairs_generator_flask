@@ -4,6 +4,13 @@ from wtforms.validators import DataRequired, Length, EqualTo
 
 
 class SubmitSendingEmail(FlaskForm):
+    email_title = StringField(
+        'Email title',
+        validators=[
+            DataRequired(),
+            Length(min=2, max=20)
+        ]
+    )
     email_body = StringField(
         'Email body',
         validators=[

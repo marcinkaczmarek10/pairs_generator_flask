@@ -152,5 +152,4 @@ class WhichCount(SessionFactory.Base):
     )
 
 
-
 SessionFactory.Base.metadata.create_all(SessionFactory.engine)

@@ -6,7 +6,7 @@ from flask import Blueprint, render_template, flash, redirect, request, jsonify
 from flask_login import current_user, login_required
 from website.forms.GenerateRandomPairs import GenerateRandomPairsForm
 from website.database.DB import SessionFactory, SessionContextManager
-from website.database.models import RandomPerson, RandomPair, DrawCount
+from website.database.models import RandomPerson, RandomPair, DrawCount, WhichCount
 from website.generate_pairs.generate_random_pairs import Person, generate_random_pairs
 from website.utils.email import send_mail_to_pairs, MailError
 from website.utils.data_serializers import ResultSchema
@@ -134,13 +134,6 @@ def delete_result():
     return jsonify({}, 200)
 
 
-@generate_pairs.route('/submit-result', methods=['POST'])
-@login_required
-def submit_result():
-    req = request.get_data().decode('utf-8')
-    return submit_sending_emails(req)
-
-
 @generate_pairs.route('/submit-sending-email', methods=['GET', 'POST'])
 @login_required
 def submit_sending_emails():
@@ -151,10 +144,19 @@ def submit_sending_emails():
         item_getter = operator.itemgetter('draw_count')
         draw_id = set(map(item_getter, req))
 
+        with SessionContextManager() as session:
+            session.add(WhichCount(draw_count=draw_id.pop()))
 
-    if form.validate_on_submit():
+    test = SessionFactory.session.query(WhichCount).first()
+    print(test)
+    if not test:
+        return redirect('/')
+    recipients = SessionFactory.session.query(RandomPair).filter_by(draw_count=test.draw_count).all()
+    if form.validate_on_submit() and recipients:
         try:
-            #send_mail_to_pairs()
+            send_mail_to_pairs(recipients, form.email_title.data, form.email_body.data)
+            with SessionContextManager() as session:
+                session.delete(test)
             flash('Emails have been sent!', 'info')
         except MailError:
             flash('Something went wrong!', 'danger')
