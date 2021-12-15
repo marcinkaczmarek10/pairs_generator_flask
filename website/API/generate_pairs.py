@@ -93,7 +93,16 @@ def delete_pair(user):
 @api.route('/delete-results', methods=['DELETE'])
 @token_required
 def delete_results(user):
-    pass
+    result = request.get_json()
+    draw_id = result['draw_count']
+    query = SessionFactory.session.query(RandomPair).filter_by(draw_count=draw_id).all()
+    if query:
+        with SessionContextManager() as session:
+            session.delete(query)
+
+        return jsonify({'message': 'Result deleted!'}), 200
+
+    return jsonify({'message': 'There is no result!'}), 404
 
 
 @api.route('/send-email<user_id>', methods=['POST'])

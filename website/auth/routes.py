@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, flash, redirect, request
-from flask_login import current_user, login_user, logout_user
+from flask_login import current_user, login_user, logout_user, login_required
 from website.forms.Login import LoginForm
 from website.forms.Registration import RegistrationForm
 from website.forms.reset_password import ResetPasswordForm, ResetPasswordSubmitForm
@@ -7,6 +7,7 @@ from website.database.DB import SessionContextManager, SessionFactory
 from website.database.models import User
 from website.utils.email import send_reset_password_mail, send_verifiaction_mail
 from werkzeug.security import generate_password_hash, check_password_hash
+from website.utils.forms import UpdatePassword
 
 
 auth = Blueprint('auth', __name__)
@@ -27,7 +28,6 @@ def login():
             flash('You have been logged in', 'success')
 
             return redirect(redirect_page) if redirect_page else redirect('/')
-
         else:
             flash('Login unsuccessful', 'danger')
 
@@ -50,7 +50,6 @@ def register():
         return redirect('/')
 
     form = RegistrationForm()
-
     if form.validate_on_submit():
         hashed_password = generate_password_hash(
             form.password.data,
@@ -66,7 +65,7 @@ def register():
             try:
                 sessionCM.add(user)
             except Exception as err:
-                flash('Nie dodało', 'danger')
+                flash('Something went wrong', 'danger')
                 raise err
 
         send_verifiaction_mail(user)
@@ -90,12 +89,14 @@ def reset_password_submit():
         return redirect('/')
     form = ResetPasswordSubmitForm()
     if form.validate_on_submit():
-        verified_user = SessionFactory.session.query(User).filter_by(email=form.email.data).first()
+        verified_user = SessionFactory.session.query(User).\
+            filter_by(email=form.email.data).first()
         if verified_user is None:
-            flash('no user', 'danger')
+            flash('There is no registered email.', 'danger')
         send_reset_password_mail(verified_user)
         flash('Reset link sent to your email', 'success')
         return redirect('/login')
+
     return render_template(
         'reset_password_submit.html',
         title='Reset_password_submit',
@@ -121,9 +122,9 @@ def reset_password(token):
         user_new_password = {
             User.password: hashed_password
         }
-        with SessionContextManager as sessionCM:
-            sessionCM.query(
-                User).filter_by(id=verified_user).update(user_new_password)
+        with SessionContextManager():
+            SessionFactory.session.query(User).\
+                filter_by(id=verified_user.id).update(user_new_password)
         flash('Password Updated!', 'success')
         return redirect('/login')
 
@@ -142,9 +143,26 @@ def confirm_email(token):
         return redirect('/')
 
     if verified_user:
-        with SessionContextManager() as sessionCM:
-            sessionCM.query(User).filter_by(id=verified_user).update(User.is_confirmed is True)
+        with SessionContextManager():
+            SessionFactory.session.query(User).filter_by(id=verified_user.id).\
+                update({User.is_confirmed: True})
             flash('Your email has been confirmed.', 'info')
             return redirect('/login')
 
     return render_template('confirm_email.html')
+
+
+@auth.route('/account', methods=['GET', 'POST'])
+@login_required
+def account():
+    form = UpdatePassword()
+    if form.validate_on_submit():
+        hashed_passowrd = generate_password_hash(
+            form.password.data, method='sha256'
+        )
+        with SessionContextManager():
+            SessionFactory.session.query(User).filter_by(id=current_user.id).\
+                update({User.password: hashed_passowrd})
+            flash('Your password has been updated!', 'success')
+
+    return render_template('account.html', form=form)

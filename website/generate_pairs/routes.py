@@ -1,11 +1,12 @@
 import json
 import itertools
 import operator
-from flask import Blueprint, render_template, flash, redirect, request, jsonify, url_for
+import flask
+from flask import Blueprint, render_template, flash, redirect, request, jsonify
 from flask_login import current_user, login_required
 from website.forms.GenerateRandomPairs import GenerateRandomPairsForm
 from website.database.DB import SessionFactory, SessionContextManager
-from website.database.models import RandomPerson, RandomPair, DrawCount
+from website.database.models import RandomPerson, RandomPair, DrawCount, WhichCount
 from website.generate_pairs.generate_random_pairs import Person, generate_random_pairs
 from website.utils.email import send_mail_to_pairs, MailError
 from website.utils.data_serializers import ResultSchema
@@ -75,8 +76,8 @@ def results():
         with SessionContextManager() as sessionCM:
             sessionCM.add(draw_count)
 
-        is_draw_count = SessionFactory.session.query(
-                    DrawCount).filter_by(user_id=current_user.id).order_by(DrawCount.id.desc()).first()
+        is_draw_count = SessionFactory.session.query(DrawCount).\
+            filter_by(user_id=current_user.id).order_by(DrawCount.id.desc()).first()
         if is_draw_count:
             for [first_person, second_person] in user_results:
                 user_random_pairs = RandomPair(
@@ -101,10 +102,9 @@ def results():
 @generate_pairs.route('/show-results')
 @login_required
 def show_results():
-    user_random_pairs_result = SessionFactory.session.query(
-        RandomPair).outerjoin(
-        DrawCount, RandomPair.draw_count == DrawCount.id).filter(
-        DrawCount.user_id == current_user.id).all()
+    user_random_pairs_result = SessionFactory.session.query(RandomPair).\
+        outerjoin(DrawCount, RandomPair.draw_count == DrawCount.id).\
+        filter(DrawCount.user_id == current_user.id).all()
 
     schema = ResultSchema(many=True)
     pretty_result = schema.dump(user_random_pairs_result)
@@ -122,12 +122,12 @@ def show_results():
 @login_required
 def delete_result():
     req = request.get_data().decode('utf-8')
+    print(req)
     req_json = json.loads(req)
 
     if req_json:
         for result in req_json:
             result_query = SessionFactory.session.query(RandomPair).get(result['id'])
-            print(result_query)
             with SessionContextManager() as sessionCM:
                 sessionCM.delete(result_query)
 
@@ -147,12 +147,32 @@ def submit_result():
         flash('Something went wrong!', 'danger')
         return jsonify({}), 500
 
-
+      
 @generate_pairs.route('/submit-sending-email', methods=['GET', 'POST'])
 @login_required
 def submit_sending_emails():
     form = SubmitSendingEmail()
-    if form.validate_on_submit():
-        pass
+    if flask.request.method == 'POST':
+        req_json = request.get_data().decode('utf-8')
+        req = json.loads(req_json)
+        item_getter = operator.itemgetter('draw_count')
+        draw_id = set(map(item_getter, req))
+
+        with SessionContextManager() as session:
+            session.add(WhichCount(draw_count=draw_id.pop()))
+
+    test = SessionFactory.session.query(WhichCount).first()
+    print(test)
+    if not test:
+        return redirect('/')
+    recipients = SessionFactory.session.query(RandomPair).filter_by(draw_count=test.draw_count).all()
+    if form.validate_on_submit() and recipients:
+        try:
+            send_mail_to_pairs(recipients, form.email_title.data, form.email_body.data)
+            with SessionContextManager() as session:
+                session.delete(test)
+            flash('Emails have been sent!', 'info')
+        except MailError:
+            flash('Something went wrong!', 'danger')
 
     return render_template('submit_sending_email.html', form=form)

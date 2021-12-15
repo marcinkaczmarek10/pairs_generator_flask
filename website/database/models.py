@@ -99,6 +99,11 @@ class DrawCount(SessionFactory.Base):
     draw_pairs = relationship(
         'RandomPair'
     )
+    which_count_clicked = relationship(
+        'WhichCount',
+        backref='which_count',
+        uselist=False
+    )
 
 
 class RandomPair(SessionFactory.Base):
@@ -123,6 +128,21 @@ class RandomPair(SessionFactory.Base):
     second_person_email = Column(
         String(120),
         nullable=False
+    )
+    draw_count = Column(
+        Integer,
+        ForeignKey(
+            'drawCount.id'
+        )
+    )
+
+
+class WhichCount(SessionFactory.Base):
+    __tablename__ = 'whichCounts'
+
+    id = Column(
+        Integer,
+        primary_key=True
     )
     draw_count = Column(
         Integer,
