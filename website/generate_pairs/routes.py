@@ -134,6 +134,20 @@ def delete_result():
     return jsonify({}, 200)
 
 
+@generate_pairs.route('/submit-result', methods=['POST'])
+@login_required
+def submit_result():
+    req = request.get_data().decode('utf-8')
+    re_json = json.loads(req)
+    try:
+        send_mail_to_pairs(re_json)
+        flash('Emails have been sent!', 'info')
+        return jsonify({}), 200
+    except MailError:
+        flash('Something went wrong!', 'danger')
+        return jsonify({}), 500
+
+      
 @generate_pairs.route('/submit-sending-email', methods=['GET', 'POST'])
 @login_required
 def submit_sending_emails():
