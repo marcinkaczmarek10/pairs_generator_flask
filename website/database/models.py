@@ -147,8 +147,9 @@ class WhichCount(SessionFactory.Base):
     draw_count = Column(
         Integer,
         ForeignKey(
-            'drawCount.id'
-        )
+            'drawCount.id',
+        ),
+        unique=True
     )
 
 

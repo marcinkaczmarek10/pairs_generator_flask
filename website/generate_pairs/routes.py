@@ -1,8 +1,7 @@
 import json
 import itertools
 import operator
-import flask
-from flask import Blueprint, render_template, flash, redirect, request, jsonify
+from flask import Blueprint, render_template, flash, redirect, request, jsonify, abort
 from flask_login import current_user, login_required
 from website.forms.GenerateRandomPairs import GenerateRandomPairsForm
 from website.database.DB import SessionFactory, SessionContextManager
@@ -134,31 +133,53 @@ def delete_result():
     return jsonify({}, 200)
 
 
+@generate_pairs.route('/submit-result', methods=['POST'])
+@login_required
+def submit_result():
+    req_json = request.get_data().decode('utf-8')
+    req = json.loads(req_json)
+    item_getter = operator.itemgetter('draw_count')
+    draw_id = list(set(map(item_getter, req)))
+    print(draw_id[0])
+    is_draw_id = SessionFactory.session.query(WhichCount).filter_by(draw_count=draw_id[0]).first()
+    if is_draw_id:
+        with SessionContextManager() as session:
+            session.delete(is_draw_id)
+
+        flash('Ups', 'danger')
+        return abort(403, description='You cannot do this')
+        #TODO coś tu jest nie tak
+
+    with SessionContextManager() as session:
+        session.add(WhichCount(draw_count=draw_id[0]))
+
+    return jsonify({'message': 'ok'}), 200
+
+
 @generate_pairs.route('/submit-sending-email', methods=['GET', 'POST'])
 @login_required
 def submit_sending_emails():
     form = SubmitSendingEmail()
-    if flask.request.method == 'POST':
-        req_json = request.get_data().decode('utf-8')
-        req = json.loads(req_json)
-        item_getter = operator.itemgetter('draw_count')
-        draw_id = set(map(item_getter, req))
-
-        with SessionContextManager() as session:
-            session.add(WhichCount(draw_count=draw_id.pop()))
-
-    test = SessionFactory.session.query(WhichCount).first()
-    print(test)
+    test = SessionFactory.session.query(WhichCount).\
+        outerjoin(DrawCount, WhichCount.draw_count == DrawCount.id).\
+        filter(DrawCount.user_id == current_user.id).order_by(WhichCount.id.desc()).first()
+    print(test.draw_count)
     if not test:
         return redirect('/')
-    recipients = SessionFactory.session.query(RandomPair).filter_by(draw_count=test.draw_count).all()
+    query = SessionFactory.session.query(RandomPair).filter_by(draw_count=test.draw_count).all()
+    schema = ResultSchema(many=True)
+    recipients = schema.dump(query)
     if form.validate_on_submit() and recipients:
         try:
             send_mail_to_pairs(recipients, form.email_title.data, form.email_body.data)
             with SessionContextManager() as session:
                 session.delete(test)
             flash('Emails have been sent!', 'info')
+            return redirect('/')
         except MailError:
             flash('Something went wrong!', 'danger')
+
+    if not recipients:
+        flash('There is no results', 'danger')
 
     return render_template('submit_sending_email.html', form=form)

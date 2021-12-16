@@ -1,5 +1,6 @@
 import unittest
 from flask import current_app
+from flask_login import login_user
 from website import create_app
 from website.database.DB import SessionFactory
 from website.config import TestingConfig
@@ -34,7 +35,7 @@ class ClientAuthTestCase(unittest.TestCase):
             'password': 'test',
             'confirm_password': 'test'
         })
-        self.assertEqual(res.status_code, 200)
+        self.assertEqual(res.status_code, 302)
 
     def test_register_authenticated(self):
         pass
@@ -76,5 +77,38 @@ class ClientAuthTestCase(unittest.TestCase):
     def test_account(self):
         res_get = self.client.get('/account')
         res_post = self.client.post('/account', data={'password': 'test', 'confirm_password': 'test'})
-        self.assertEqual(res_get.status_code, 200)
-        self.assertEqual(res_post.status_code, 200)
+        self.assertEqual(res_get.status_code, 302)
+        self.assertEqual(res_post.status_code, 302)
+
+
+class ClientAuthenticatedTestCase(unittest.TestCase):
+    def setUp(self):
+        self.app = create_app(TestingConfig)
+        self.app_context = self.app.app_context()
+        self.app_context.push()
+        self.client = self.app.test_client(use_cookies=True)
+
+    def tearDown(self):
+        self.app_context.pop()
+
+    @classmethod
+    def setUpClass(cls) -> None:
+        session = SessionFactory()
+        SessionFactory.Base.metadata.create_all(session.engine)
+
+    @classmethod
+    def tearDownClass(cls) -> None:
+        session = SessionFactory()
+        SessionFactory.Base.metadata.drop_all(session.engine)
+
+    def test_login(self):
+        pass
+
+    def test_register(self):
+        pass
+
+    def test_restet_passwrod(self):
+        pass
+
+    def test_account(self):
+        pass
