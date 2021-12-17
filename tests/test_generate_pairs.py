@@ -24,3 +24,8 @@ class GenerateRandomPairsTestCase(unittest.TestCase):
     def test_somebody_draw_himself(self):
         for first_person, second_person in self.draw:
             self.assertNotEqual(first_person.name, second_person.name)
+
+    def test_wrong_type(self):
+        pool = self.first_person
+        with self.assertRaises(TypeError):
+            generate_random_pairs(pool)

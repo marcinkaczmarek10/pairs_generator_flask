@@ -1,3 +1,4 @@
+import os
 from flask import Blueprint, render_template, flash, redirect, request
 from flask_login import current_user, login_user, logout_user, login_required
 from website.forms.Login import LoginForm
@@ -5,7 +6,7 @@ from website.forms.Registration import RegistrationForm
 from website.forms.reset_password import ResetPasswordForm, ResetPasswordSubmitForm
 from website.database.DB import SessionContextManager, SessionFactory
 from website.database.models import User
-from website.utils.email import send_reset_password_mail, send_verifiaction_mail
+from website.utils.email_sending import send_reset_password_mail, send_verifiaction_mail
 from werkzeug.security import generate_password_hash, check_password_hash
 from website.utils.forms import UpdatePassword
 
@@ -166,3 +167,11 @@ def account():
             flash('Your password has been updated!', 'success')
 
     return render_template('account.html', form=form)
+
+
+if not os.environ.get('ENV') == 'PRODUCTION':
+    @auth.route('/auto-login')
+    def auto_login():
+        user = SessionFactory.session.query(User).filter_by(username='user').first()
+        login_user(user, remember=True)
+        return 'ok', 200

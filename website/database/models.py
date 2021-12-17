@@ -38,7 +38,7 @@ class User(SessionFactory.Base, UserMixin):
         'DrawCount'
     )
 
-    def get_token(self, expires_sec=1800):
+    def get_token(self, expires_sec=3600):
         serializer = Serializer(current_app.config['SECRET_KEY'], expires_sec)
         return serializer.dumps({
             'user_id': self.id
@@ -147,8 +147,9 @@ class WhichCount(SessionFactory.Base):
     draw_count = Column(
         Integer,
         ForeignKey(
-            'drawCount.id'
-        )
+            'drawCount.id',
+        ),
+        unique=True
     )
 
 

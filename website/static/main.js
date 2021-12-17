@@ -6,7 +6,7 @@ function deleteResult(draw){
 		}
 
 function submitResult(result){
-    fetch("/submit-sending-email", {
+    fetch("/submit-result", {
         method: "POST",
         body: JSON.stringify(result)
     }).then((res) => window.location.assign("/submit-sending-email"))
