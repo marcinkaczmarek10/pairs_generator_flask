@@ -7,7 +7,7 @@ from website.forms.GenerateRandomPairs import GenerateRandomPairsForm
 from website.database.DB import SessionFactory, SessionContextManager
 from website.database.models import RandomPerson, RandomPair, DrawCount, WhichCount
 from website.generate_pairs.generate_random_pairs import Person, generate_random_pairs
-from website.utils.email import send_mail_to_pairs, MailError
+from website.utils.email_sending import send_mail_to_pairs, MailError
 from website.utils.data_serializers import ResultSchema
 from website.utils.forms import SubmitSendingEmail
 
@@ -143,12 +143,8 @@ def submit_result():
     print(draw_id[0])
     is_draw_id = SessionFactory.session.query(WhichCount).filter_by(draw_count=draw_id[0]).first()
     if is_draw_id:
-        with SessionContextManager() as session:
-            session.delete(is_draw_id)
 
-        flash('Ups', 'danger')
         return abort(403, description='You cannot do this')
-        #TODO coś tu jest nie tak
 
     with SessionContextManager() as session:
         session.add(WhichCount(draw_count=draw_id[0]))
@@ -162,18 +158,26 @@ def submit_sending_emails():
     form = SubmitSendingEmail()
     test = SessionFactory.session.query(WhichCount).\
         outerjoin(DrawCount, WhichCount.draw_count == DrawCount.id).\
-        filter(DrawCount.user_id == current_user.id).order_by(WhichCount.id.desc()).first()
-    print(test.draw_count)
+        filter(DrawCount.user_id == current_user.id).order_by(WhichCount.id.desc()).all()
+    print(test)
     if not test:
         return redirect('/')
-    query = SessionFactory.session.query(RandomPair).filter_by(draw_count=test.draw_count).all()
+    if len(test) > 1:
+        for result in test:
+            with SessionContextManager() as session:
+                session.delete(result)
+        flash('More than one', 'danger')
+        return redirect('/show-results')
+    get_test_id = test[0]
+    print(get_test_id)
+    query = SessionFactory.session.query(RandomPair).filter_by(draw_count=get_test_id.draw_count).all()
     schema = ResultSchema(many=True)
     recipients = schema.dump(query)
     if form.validate_on_submit() and recipients:
         try:
             send_mail_to_pairs(recipients, form.email_title.data, form.email_body.data)
             with SessionContextManager() as session:
-                session.delete(test)
+                session.delete(get_test_id)
             flash('Emails have been sent!', 'info')
             return redirect('/')
         except MailError:

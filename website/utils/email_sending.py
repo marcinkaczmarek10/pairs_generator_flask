@@ -81,5 +81,5 @@ def send_mail_to_pairs(recipients, title, body):
             title,
             'random_pair_generator@post.com',
             [recipient['second_person_email']],
-            f'{recipient["first_person_name"]} Has picked you {recipient["second_person_name"]}!\n {body}'
+            f'{recipient["first_person_name"]} Has picked you {recipient["second_person_name"]}!\n {body}')
         SendMail.send_mail(message)

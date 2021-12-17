@@ -20,4 +20,4 @@ def api_login():
         token = user.get_token()
         return jsonify({'token': token}), 200
 
-    return make_response({'message': 'Something went wrong'}), 401
+    return make_response({'message': 'Wrong password'}), 401
