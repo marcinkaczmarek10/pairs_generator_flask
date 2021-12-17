@@ -17,3 +17,11 @@ class DevelopConfig(Config):
 
 class ProductionConfig(Config):
     DEBUG = False
+
+
+class TestingConfig(Config):
+    TESTING = True
+    SECRET_KEY = 'secret_key'
+    WTF_CSRF_ENABLED = False
+    WTF_CSRF_METHODS = []
+    LOGIN_DISABLED = False

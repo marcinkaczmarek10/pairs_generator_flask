@@ -1,7 +1,7 @@
 from flask import Flask
 from website.utils.login_manager import login_manager, CustomCookieSessionInterface
 from website.config import ProductionConfig, DevelopConfig
-from website.utils.email import mail
+from website.utils.email_sending import mail
 from website.utils.data_serializers import marshmallow
 import os
 

@@ -6,12 +6,13 @@ from website.database.models import RandomPerson, RandomPair, DrawCount
 from website.generate_pairs.generate_random_pairs import generate_random_pairs, Person
 from website.utils.data_serializers import ResultSchema, RandomPersonSchema
 from website.utils.login_manager import token_required
+from website.utils.email_sending import send_mail_to_pairs, MailError
 
 
 api = Blueprint('api', __name__)
 
 
-@api.route('/results/')
+@api.route('/results')
 @token_required
 def get_results(user):
     query = SessionFactory.session.query(
@@ -40,14 +41,13 @@ def get_user_pairs(user):
 
 @api.route('/generate-pairs', methods=['POST'])
 @token_required
-def post_generate_pairs(user, user_pairs):
-    user_random_people_pool = user_pairs
-
+def post_generate_pairs(user):
+    req = request.get_json()
+    user_random_people_pool = [
+        Person(person['random_person_name'], person['random_person_email']) for person in req
+    ]
     if len(user_random_people_pool) > 1:
-        random_person_pool = [
-            Person(row.random_person_name, row.random_person_email) for row in user_random_people_pool
-        ]
-        user_results = generate_random_pairs(random_person_pool)
+        user_results = generate_random_pairs(user_random_people_pool)
         draw_count = DrawCount(user_id=user.id)
 
         with SessionContextManager() as sessionCM:
@@ -72,7 +72,7 @@ def post_generate_pairs(user, user_pairs):
 
         return jsonify({'Message': 'Your pairs were created!'}), 200
 
-    return abort(404)
+    return abort(403, description='You cannot do this')
 
 
 @api.route('/delete-pair', methods=['DELETE'])
@@ -80,8 +80,9 @@ def post_generate_pairs(user, user_pairs):
 def delete_pair(user):
     pair = request.get_json()
     pair_id = pair['pair']
-    query = SessionFactory.session.query(RandomPerson).filter_by(user_id=user.id, id=pair_id).first()
-    if pair and query:
+    query = SessionFactory.session.query(RandomPerson).filter_by(id=pair_id).first()
+    print(query)
+    if query:
         with SessionContextManager() as session:
             session.delete(query)
 
@@ -93,10 +94,31 @@ def delete_pair(user):
 @api.route('/delete-results', methods=['DELETE'])
 @token_required
 def delete_results(user):
-    pass
+    result = request.get_json()
+    draw_id = result['draw_count']
+    query = SessionFactory.session.query(RandomPair).filter_by(draw_count=draw_id).all()
+    if query:
+        for row in query:
+            with SessionContextManager() as session:
+                session.delete(row)
+
+        return jsonify({'message': 'Result deleted!'}), 200
+
+    return jsonify({'message': 'There is no result!'}), 404
 
 
-@api.route('/send-email<user_id>', methods=['POST'])
+@api.route('/send-email', methods=['POST'])
 @token_required
 def send_email_to_chosen(user):
-    pass
+    req = request.get_json()
+    query = SessionFactory.session.query(RandomPair).filter_by(draw_count=req['draw_count']).all()
+    schema = ResultSchema(many=True)
+    recipients = schema.dump(query)
+    if query:
+        try:
+            send_mail_to_pairs(recipients, req['title'], req['body'])
+            return jsonify({'message': 'Emails sent!'}), 200
+        except MailError:
+            return jsonify({'message': 'Could not send mails!'}), 500
+
+    return jsonify({'message': 'There are no results'}), 404

@@ -1,5 +1,4 @@
 from random import choice
-import json
 from dataclasses import dataclass
 
 
@@ -12,7 +11,9 @@ class Person:
         return f'({self.name}, {self.email})'
 
 
-def _generate_random_pairs(random_people) -> list:
+def _generate_random_pairs(random_people: list) -> list:
+    if not isinstance(random_people, list):
+        raise TypeError
     draw_pool = random_people.copy()
     draw_results = []
 

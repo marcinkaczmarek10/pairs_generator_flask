@@ -38,7 +38,7 @@ class User(SessionFactory.Base, UserMixin):
         'DrawCount'
     )
 
-    def get_token(self, expires_sec=1800):
+    def get_token(self, expires_sec=3600):
         serializer = Serializer(current_app.config['SECRET_KEY'], expires_sec)
         return serializer.dumps({
             'user_id': self.id
@@ -99,6 +99,11 @@ class DrawCount(SessionFactory.Base):
     draw_pairs = relationship(
         'RandomPair'
     )
+    which_count_clicked = relationship(
+        'WhichCount',
+        backref='which_count',
+        uselist=False
+    )
 
 
 class RandomPair(SessionFactory.Base):
@@ -129,6 +134,22 @@ class RandomPair(SessionFactory.Base):
         ForeignKey(
             'drawCount.id'
         )
+    )
+
+
+class WhichCount(SessionFactory.Base):
+    __tablename__ = 'whichCounts'
+
+    id = Column(
+        Integer,
+        primary_key=True
+    )
+    draw_count = Column(
+        Integer,
+        ForeignKey(
+            'drawCount.id',
+        ),
+        unique=True
     )
 
 
