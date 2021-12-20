@@ -32,7 +32,7 @@ class User(SessionFactory.Base, UserMixin):
         default=False
     )
     user_pairs = relationship(
-        'RandomPerson'
+        'UsersPerson'
     )
     user_results = relationship(
         'DrawCount'
@@ -57,18 +57,18 @@ class User(SessionFactory.Base, UserMixin):
         return f'User({self.username},{self.email})'
 
 
-class RandomPerson(SessionFactory.Base):
-    __tablename__ = 'RandomPerson'
+class UsersPerson(SessionFactory.Base):
+    __tablename__ = 'usersPeople'
 
     id = Column(
         Integer,
         primary_key=True
     )
-    random_person_name = Column(
+    person_name = Column(
         String(40),
         nullable=False
     )
-    random_person_email = Column(
+    person_email = Column(
         String(120),
         nullable=False
     )
@@ -80,11 +80,11 @@ class RandomPerson(SessionFactory.Base):
     )
 
     def __repr__(self):
-        return f'RandomPerson({self.random_person_name}, {self.random_person_email})'
+        return f'UsersPerson({self.person_name}, {self.person_email})'
 
 
 class DrawCount(SessionFactory.Base):
-    __tablename__ = "drawCount"
+    __tablename__ = 'drawCounts'
 
     id = Column(
         Integer,
@@ -100,8 +100,8 @@ class DrawCount(SessionFactory.Base):
         'RandomPair'
     )
     which_count_clicked = relationship(
-        'WhichCount',
-        backref='which_count',
+        'WhichDraw',
+        backref='which_draw',
         uselist=False
     )
 
@@ -132,13 +132,13 @@ class RandomPair(SessionFactory.Base):
     draw_count = Column(
         Integer,
         ForeignKey(
-            'drawCount.id'
+            'drawCounts.id'
         )
     )
 
 
-class WhichCount(SessionFactory.Base):
-    __tablename__ = 'whichCounts'
+class WhichDraw(SessionFactory.Base):
+    __tablename__ = 'whichDraws'
 
     id = Column(
         Integer,
@@ -147,7 +147,7 @@ class WhichCount(SessionFactory.Base):
     draw_count = Column(
         Integer,
         ForeignKey(
-            'drawCount.id',
+            'drawCounts.id',
         ),
         unique=True
     )

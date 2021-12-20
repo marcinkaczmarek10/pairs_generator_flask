@@ -1,7 +1,7 @@
 import unittest
 from website import create_app
 from website.database.DB import SessionFactory, SessionContextManager
-from website.database.models import User, RandomPerson, RandomPair, DrawCount
+from website.database.models import User, UsersPerson, RandomPair, DrawCount
 from website.config import TestingConfig
 
 
@@ -49,12 +49,12 @@ class RandomPersonTestCase(unittest.TestCase):
         self.app = create_app(TestingConfig)
         self.app_context = self.app.app_context()
         self.app_context.push()
-        self.first_person = RandomPerson(random_person_name='Janusz',
-                                         random_person_email='janusz@testmail.com',
+        self.first_person = UsersPerson(person_name='Janusz',
+                                        person_email='janusz@testmail.com',
+                                        user_id=1)
+        self.second_person = UsersPerson(person_name='Mirek',
+                                         person_email='mirek@testmail.com',
                                          user_id=1)
-        self.second_person = RandomPerson(random_person_name='Mirek',
-                                          random_person_email='mirek@testmail.com',
-                                          user_id=1)
         with SessionContextManager() as session:
             session.add(self.first_person)
             session.add(self.second_person)
@@ -73,20 +73,20 @@ class RandomPersonTestCase(unittest.TestCase):
         SessionFactory.Base.metadata.drop_all(session.engine)
 
     def test_exist_in_db(self):
-        self.query_desc = SessionFactory.session.query(RandomPerson).order_by(RandomPerson.id.desc()).first()
-        self.query_asc = SessionFactory.session.query(RandomPerson).order_by(RandomPerson.id.asc()).first()
-        self.assertEqual(self.second_person.random_person_name, self.query_desc.random_person_name)
-        self.assertEqual(self.first_person.random_person_name, self.query_asc.random_person_name)
+        self.query_desc = SessionFactory.session.query(UsersPerson).order_by(UsersPerson.id.desc()).first()
+        self.query_asc = SessionFactory.session.query(UsersPerson).order_by(UsersPerson.id.asc()).first()
+        self.assertEqual(self.second_person.person_name, self.query_desc.person_name)
+        self.assertEqual(self.first_person.person_name, self.query_asc.person_name)
 
     def test_delete_from_db(self):
         with SessionContextManager() as session:
             session.delete(self.first_person)
             session.delete(self.second_person)
-        self.query = SessionFactory.session.query(RandomPerson).first()
+        self.query = SessionFactory.session.query(UsersPerson).first()
         self.assertIsNone(self.query)
 
     def test_wrong_user_query(self):
-        self.query = SessionFactory.session.query(RandomPerson).filter_by(user_id=2).first()
+        self.query = SessionFactory.session.query(UsersPerson).filter_by(user_id=2).first()
         self.assertIsNone(self.query)
 
 
