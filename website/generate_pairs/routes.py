@@ -9,9 +9,12 @@ from website.generate_pairs.generate_random_pairs import Person, generate_random
 from website.utils.email_sending import send_mail_to_pairs, MailError
 from website.utils.data_serializers import ResultSchema
 from website.utils.forms import SubmitSendingEmailForm, GenerateRandomPairsForm
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 
 
 generate_pairs = Blueprint('generate_pairs', __name__)
+limiter = Limiter(key_func=get_remote_address)
 
 
 @generate_pairs.route('/generate-pairs', methods=['GET', 'POST'])
@@ -151,6 +154,7 @@ def submit_result():
 
 @generate_pairs.route('/submit-sending-email', methods=['GET', 'POST'])
 @login_required
+@limiter.limit('20/day', key_func=lambda: current_user.username)
 def submit_sending_emails():
     form = SubmitSendingEmailForm()
     is_draw = SessionFactory.session.query(WhichDraw).\
