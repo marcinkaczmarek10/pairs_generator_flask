@@ -10,10 +10,9 @@ class MailError(Exception):
     pass
 
 
-def email_message(subject: str, sender: str, recipients: list, body: str):
+def email_message(subject: str, recipients: list, body: str):
     message = Message(
         subject=subject,
-        sender=sender,
         recipients=recipients,
         body=body
     )
@@ -36,15 +35,13 @@ def send_reset_password_mail(user):
     token = user.get_token()
     message = email_message(
         'Password reset for Random Pairs Generator',
-        'random_pair_generator@post.com',
         [user.email],
         f"""Click the link below to reset your password.
         {url_for(
             'auth.reset_password',
             token=token,
             _external=True
-        )}
-"""
+        )}"""
     )
     send_email(message)
 
@@ -53,7 +50,6 @@ def send_verification_mail(user):
     token = user.get_token()
     message = email_message(
         'Email confirmation for Random Pairs Generator',
-        'random_pair_generator@post.com',
         [user.email],
         f"""Click the link below to confirm your email.
             {url_for(
@@ -70,7 +66,6 @@ def send_mail_to_pairs(recipients, title, body):
     for recipient in recipients:
         message = email_message(
             title,
-            'random_pair_generator@post.com',
-            [recipient['second_person_email']],
-            f'{recipient["first_person_name"]} Has picked you {recipient["second_person_name"]}!\n{body}')
+            [recipient['first_person_email']],
+            f'Hey {recipient["first_person_name"]}! You picked: {recipient["second_person_name"]}!\n{body}')
         send_email(message)
