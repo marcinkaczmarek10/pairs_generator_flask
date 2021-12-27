@@ -3,16 +3,18 @@ import itertools
 import operator
 from flask import Blueprint, render_template, flash, redirect, request, jsonify, abort
 from flask_login import current_user, login_required
-from website.forms.GenerateRandomPairs import GenerateRandomPairsForm
 from website.database.DB import SessionFactory, SessionContextManager
-from website.database.models import RandomPerson, RandomPair, DrawCount, WhichCount
+from website.database.models import UsersPerson, RandomPair, DrawCount, WhichDraw
 from website.generate_pairs.generate_random_pairs import Person, generate_random_pairs
 from website.utils.email_sending import send_mail_to_pairs, MailError
 from website.utils.data_serializers import ResultSchema
-from website.utils.forms import SubmitSendingEmail
+from website.utils.forms import SubmitSendingEmailForm, GenerateRandomPairsForm
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 
 
 generate_pairs = Blueprint('generate_pairs', __name__)
+limiter = Limiter(key_func=get_remote_address)
 
 
 @generate_pairs.route('/generate-pairs', methods=['GET', 'POST'])
@@ -21,55 +23,55 @@ def pairs():
     form = GenerateRandomPairsForm()
 
     if form.validate_on_submit():
-        random_person = RandomPerson(
-            random_person_name=form.random_person_name.data,
-            random_person_email=form.random_person_email.data,
+        person = UsersPerson(
+            person_name=form.person_name.data,
+            person_email=form.person_email.data,
             user_id=current_user.id
         )
 
-        with SessionContextManager() as sessionCM:
-            sessionCM.add(random_person)
+        with SessionContextManager() as session:
+            session.add(person)
 
         return redirect('/generate-pairs')
 
-    user_pair = SessionFactory.session.query(
-        RandomPerson).filter_by(user_id=current_user.id).all()
+    user_draw_pool = SessionFactory.session.query(UsersPerson).\
+        filter_by(user_id=current_user.id).all()
 
     return render_template(
         'generate_pairs.html',
         title='Generate random pairs',
         form=form,
-        user_pair=user_pair
+        user_pair=user_draw_pool
     )
 
 
-@generate_pairs.route('/delete-pair', methods=['POST'])
+@generate_pairs.route('/delete-person', methods=['POST'])
 @login_required
-def delete_pair():
-    pair = SessionFactory.session.query(
-        RandomPerson).filter_by(user_id=current_user.id).order_by(RandomPerson.id.desc()).first()
+def delete_person():
+    person = SessionFactory.session.query(UsersPerson).\
+        filter_by(user_id=current_user.id).order_by(UsersPerson.id.desc()).first()
 
-    if pair:
+    if person:
         with SessionContextManager() as sessionCM:
-            sessionCM.delete(pair)
+            sessionCM.delete(person)
 
         return redirect('/generate-pairs')
 
-    flash('There is no pairs!', 'danger')
+    flash('There is no person to delete!', 'danger')
     return redirect('/generate-pairs')
 
 
 @generate_pairs.route('/results', methods=['POST'])
 @login_required
 def results():
-    user_random_person_pool = SessionFactory.session.query(
-        RandomPerson).filter_by(user_id=current_user.id).all()
+    user_draw_pool = SessionFactory.session.query(UsersPerson).\
+        filter_by(user_id=current_user.id).all()
 
-    if len(user_random_person_pool) > 1:
-        random_person_pool = [
-            Person(row.random_person_name, row.random_person_email) for row in user_random_person_pool
+    if len(user_draw_pool) > 1:
+        draw_pool = [
+            Person(row.person_name, row.person_email) for row in user_draw_pool
         ]
-        user_results = generate_random_pairs(random_person_pool)
+        user_results = generate_random_pairs(draw_pool)
         draw_count = DrawCount(user_id=current_user.id)
 
         with SessionContextManager() as sessionCM:
@@ -79,7 +81,7 @@ def results():
             filter_by(user_id=current_user.id).order_by(DrawCount.id.desc()).first()
         if is_draw_count:
             for [first_person, second_person] in user_results:
-                user_random_pairs = RandomPair(
+                user_random_pair = RandomPair(
                     first_person_name=first_person.name,
                     first_person_email=first_person.email,
                     second_person_name=second_person.name,
@@ -87,10 +89,10 @@ def results():
                     draw_count=is_draw_count.id
                 )
                 with SessionContextManager() as sessionCM:
-                    sessionCM.add(user_random_pairs)
+                    sessionCM.add(user_random_pair)
 
         with SessionContextManager():
-            SessionFactory.session.query(RandomPerson).filter_by(user_id=current_user.id).delete()
+            SessionFactory.session.query(UsersPerson).filter_by(user_id=current_user.id).delete()
 
         return redirect('/show-results')
 
@@ -121,16 +123,15 @@ def show_results():
 @login_required
 def delete_result():
     req = request.get_data().decode('utf-8')
-    print(req)
-    req_json = json.loads(req)
+    result_to_delete = json.loads(req)
 
-    if req_json:
-        for result in req_json:
-            result_query = SessionFactory.session.query(RandomPair).get(result['id'])
+    if result_to_delete:
+        for result_id in result_to_delete:
+            result = SessionFactory.session.query(RandomPair).get(result_id['id'])
             with SessionContextManager() as sessionCM:
-                sessionCM.delete(result_query)
+                sessionCM.delete(result)
 
-    return jsonify({}, 200)
+    return jsonify({}), 200
 
 
 @generate_pairs.route('/submit-result', methods=['POST'])
@@ -140,44 +141,42 @@ def submit_result():
     req = json.loads(req_json)
     item_getter = operator.itemgetter('draw_count')
     draw_id = list(set(map(item_getter, req)))
-    print(draw_id[0])
-    is_draw_id = SessionFactory.session.query(WhichCount).filter_by(draw_count=draw_id[0]).first()
+    is_draw_id = SessionFactory.session.query(WhichDraw).filter_by(draw_count=draw_id[0]).first()
     if is_draw_id:
 
         return abort(403, description='You cannot do this')
 
     with SessionContextManager() as session:
-        session.add(WhichCount(draw_count=draw_id[0]))
+        session.add(WhichDraw(draw_count=draw_id[0]))
 
     return jsonify({'message': 'ok'}), 200
 
 
 @generate_pairs.route('/submit-sending-email', methods=['GET', 'POST'])
 @login_required
+@limiter.limit('20/day', key_func=lambda: current_user.username)
 def submit_sending_emails():
-    form = SubmitSendingEmail()
-    test = SessionFactory.session.query(WhichCount).\
-        outerjoin(DrawCount, WhichCount.draw_count == DrawCount.id).\
-        filter(DrawCount.user_id == current_user.id).order_by(WhichCount.id.desc()).all()
-    print(test)
-    if not test:
+    form = SubmitSendingEmailForm()
+    is_draw = SessionFactory.session.query(WhichDraw).\
+        outerjoin(DrawCount, WhichDraw.draw_count == DrawCount.id).\
+        filter(DrawCount.user_id == current_user.id).order_by(WhichDraw.id.desc()).all()
+    if not is_draw:
         return redirect('/')
-    if len(test) > 1:
-        for result in test:
+    if len(is_draw) > 1:
+        for draw in is_draw:
             with SessionContextManager() as session:
-                session.delete(result)
-        flash('More than one', 'danger')
+                session.delete(draw)
+        flash('More than one draw!', 'danger')
         return redirect('/show-results')
-    get_test_id = test[0]
-    print(get_test_id)
-    query = SessionFactory.session.query(RandomPair).filter_by(draw_count=get_test_id.draw_count).all()
+    get_count_id = is_draw[0]
+    query = SessionFactory.session.query(RandomPair).filter_by(draw_count=get_count_id.draw_count).all()
     schema = ResultSchema(many=True)
     recipients = schema.dump(query)
     if form.validate_on_submit() and recipients:
         try:
             send_mail_to_pairs(recipients, form.email_title.data, form.email_body.data)
             with SessionContextManager() as session:
-                session.delete(get_test_id)
+                session.delete(get_count_id)
             flash('Emails have been sent!', 'info')
             return redirect('/')
         except MailError:

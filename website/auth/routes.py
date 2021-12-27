@@ -1,14 +1,12 @@
 import os
 from flask import Blueprint, render_template, flash, redirect, request
 from flask_login import current_user, login_user, logout_user, login_required
-from website.forms.Login import LoginForm
-from website.forms.Registration import RegistrationForm
-from website.forms.reset_password import ResetPasswordForm, ResetPasswordSubmitForm
 from website.database.DB import SessionContextManager, SessionFactory
 from website.database.models import User
-from website.utils.email_sending import send_reset_password_mail, send_verifiaction_mail
+from website.utils.email_sending import send_reset_password_mail, send_verification_mail
 from werkzeug.security import generate_password_hash, check_password_hash
-from website.utils.forms import UpdatePassword
+from website.utils.forms import UpdatePasswordForm, RegistrationForm, ResetPasswordSubmitForm, \
+    ResetPasswordForm, LoginForm
 
 
 auth = Blueprint('auth', __name__)
@@ -69,7 +67,7 @@ def register():
                 flash('Something went wrong', 'danger')
                 raise err
 
-        send_verifiaction_mail(user)
+        send_verification_mail(user)
         flash(
             f'Account created {form.username.data}! Confirmation link was sent to your email.',
             'success'
@@ -156,14 +154,14 @@ def confirm_email(token):
 @auth.route('/account', methods=['GET', 'POST'])
 @login_required
 def account():
-    form = UpdatePassword()
+    form = UpdatePasswordForm()
     if form.validate_on_submit():
-        hashed_passowrd = generate_password_hash(
+        hashed_password = generate_password_hash(
             form.password.data, method='sha256'
         )
         with SessionContextManager():
             SessionFactory.session.query(User).filter_by(id=current_user.id).\
-                update({User.password: hashed_passowrd})
+                update({User.password: hashed_password})
             flash('Your password has been updated!', 'success')
 
     return render_template('account.html', form=form)

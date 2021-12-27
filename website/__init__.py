@@ -3,6 +3,7 @@ from website.utils.login_manager import login_manager, CustomCookieSessionInterf
 from website.config import ProductionConfig, DevelopConfig
 from website.utils.email_sending import mail
 from website.utils.data_serializers import marshmallow
+from website.generate_pairs.routes import limiter
 import os
 
 
@@ -19,6 +20,7 @@ def create_app(config_name=config):
     login_manager.init_app(app)
     mail.init_app(app)
     marshmallow.init_app(app)
+    limiter.init_app(app)
     app.session_interface = CustomCookieSessionInterface()
 
     from website.auth.routes import auth

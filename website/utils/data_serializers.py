@@ -1,5 +1,5 @@
 from flask_marshmallow import Marshmallow
-from website.database.models import RandomPair, RandomPerson
+from website.database.models import RandomPair, UsersPerson
 
 
 marshmallow = Marshmallow()
@@ -13,5 +13,5 @@ class ResultSchema(marshmallow.SQLAlchemyAutoSchema):
 
 class RandomPersonSchema(marshmallow.SQLAlchemyAutoSchema):
     class Meta:
-        model = RandomPerson
+        model = UsersPerson
         include_fk = True
