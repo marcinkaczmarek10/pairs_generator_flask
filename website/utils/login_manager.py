@@ -26,9 +26,9 @@ def load_user(user_id):
 def token_required(f):
     @wraps(f)
     def decorated(*args, **kwargs):
-        api_key = request.headers.get('api_key')
-        if api_key:
-            user = User.verify_token(api_key)
+        api_token = request.headers.get('api_token')
+        if api_token:
+            user = User.verify_token(api_token)
             if user:
                 return f(user, *args, **kwargs)
             else:

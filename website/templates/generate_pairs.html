@@ -9,30 +9,30 @@
                 <fieldset class="form-group">
                     <legend class="border-bottom mb-4">Generate Pairs</legend>
                      <div class="form-group">
-                       {{ form.random_person_name.label(class="form-control-label") }}
-                         {% if form.random_person_name.errors %}
-                            {{ form.random_person_name(class="form-control form-control-lg is-invalid") }}
+                       {{ form.person_name.label(class="form-control-label") }}
+                         {% if form.person_name.errors %}
+                            {{ form.person_name(class="form-control form-control-lg is-invalid") }}
                             <div class="invalid-feedback">
-                                {% for error in form.random_person_name.errors %}
+                                {% for error in form.person_name.errors %}
                                     <span>{{ error }}</span>
                                 {% endfor %}
                             </div>
                          {% else %}
-                            {{ form.random_person_name(class="form-control form-control-lg") }}
+                            {{ form.person_name(class="form-control form-control-lg") }}
                          {% endif %}
                      </div>
                     <div class="form-group">
                         <div class="form-group">
-                            {{ form.random_person_email.label(class="form-control-label") }}
-                                {% if form.random_person_email.errors %}
-                                    {{ form.random_person_email(class="form-control form-control-lg is-invalid") }}
+                            {{ form.person_email.label(class="form-control-label") }}
+                                {% if form.person_email.errors %}
+                                    {{ form.person_email(class="form-control form-control-lg is-invalid") }}
                                         <div class="invalid-feedback">
-                                            {% for error in form.random_person_email.errors %}
+                                            {% for error in form.person_email.errors %}
                                                 <span>{{ error }}</span>
                                             {% endfor %}
                                         </div>
                                 {% else %}
-                                    {{ form.random_person_email(class="form-control form-control-lg") }}
+                                    {{ form.person_email(class="form-control form-control-lg") }}
                                 {% endif %}
                         </div>
                         <br />
@@ -43,7 +43,7 @@
                 </fieldset>
                 </form>
                         <div class="form-group">
-                            <form action="{{ url_for('generate_pairs.delete_pair') }}" method="POST">
+                            <form action="{{ url_for('generate_pairs.delete_person') }}" method="POST">
                                 {{ form.remove_item(class='btn btn-outline-info') }}
                             </form>
                         </div>
@@ -53,8 +53,8 @@
             <ul class="list-group list-group-flush">
                 <div class="form-group">
                     <li class="list-group-item">
-                    {{ pair.random_person_name }}
-                    {{ pair.random_person_email }}
+                    {{ pair.person_name }}
+                    {{ pair.person_email }}
                     </li>
                 </div>
             </ul>

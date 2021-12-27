@@ -2,7 +2,7 @@ import operator
 import itertools
 from flask import jsonify, abort, Blueprint, request
 from website.database.DB import SessionFactory, SessionContextManager
-from website.database.models import RandomPerson, RandomPair, DrawCount
+from website.database.models import UsersPerson, RandomPair, DrawCount
 from website.generate_pairs.generate_random_pairs import generate_random_pairs, Person
 from website.utils.data_serializers import ResultSchema, RandomPersonSchema
 from website.utils.login_manager import token_required
@@ -32,7 +32,7 @@ def get_results(user):
 @api.route('/pairs')
 @token_required
 def get_user_pairs(user):
-    query = SessionFactory.session.query(RandomPerson).filter_by(user_id=user.id).all()
+    query = SessionFactory.session.query(UsersPerson).filter_by(user_id=user.id).all()
     schema = RandomPersonSchema(many=True)
     user_pairs = schema.dump(query)
 
@@ -44,7 +44,7 @@ def get_user_pairs(user):
 def post_generate_pairs(user):
     req = request.get_json()
     user_random_people_pool = [
-        Person(person['random_person_name'], person['random_person_email']) for person in req
+        Person(person['person_name'], person['person_email']) for person in req
     ]
     if len(user_random_people_pool) > 1:
         user_results = generate_random_pairs(user_random_people_pool)
@@ -68,7 +68,7 @@ def post_generate_pairs(user):
                     sessionCM.add(user_random_pairs)
 
         with SessionContextManager():
-            SessionFactory.session.query(RandomPerson).filter_by(user_id=user.id).delete()
+            SessionFactory.session.query(UsersPerson).filter_by(user_id=user.id).delete()
 
         return jsonify({'Message': 'Your pairs were created!'}), 200
 
@@ -80,8 +80,7 @@ def post_generate_pairs(user):
 def delete_pair(user):
     pair = request.get_json()
     pair_id = pair['pair']
-    query = SessionFactory.session.query(RandomPerson).filter_by(id=pair_id).first()
-    print(query)
+    query = SessionFactory.session.query(UsersPerson).filter_by(id=pair_id).first()
     if query:
         with SessionContextManager() as session:
             session.delete(query)
