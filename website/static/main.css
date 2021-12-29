@@ -80,8 +80,3 @@ h1, h2, h3, h4, h5, h6 {
   flex-direction: column;
   justify-content: space-between;
 }
-
-.nav-scrolled {
-  background-color: #111127E !important;
-  transition: background-color 200ms linear;
-}
