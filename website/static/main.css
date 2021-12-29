@@ -8,10 +8,6 @@ h1, h2, h3, h4, h5, h6 {
   color: #444444;
 }
 
-.bg-steel {
-  background-color: #8A2BE2;
-}
-
 .site-header .navbar-nav .nav-link {
   color: #cbd5db;
 }
@@ -32,42 +28,6 @@ h1, h2, h3, h4, h5, h6 {
   margin-bottom: 20px;
 }
 
-.article-title {
-  color: #444444;
-}
-
-a.article-title:hover {
-  color: #428bca;
-  text-decoration: none;
-}
-
-.article-content {
-  white-space: pre-line;
-}
-
-.article-img {
-  height: 65px;
-  width: 65px;
-  margin-right: 16px;
-}
-
-.article-metadata {
-  padding-bottom: 1px;
-  margin-bottom: 4px;
-  border-bottom: 1px solid #e3e3e3
-}
-
-.article-metadata a:hover {
-  color: #333;
-  text-decoration: none;
-}
-
-.article-svg {
-  width: 25px;
-  height: 25px;
-  vertical-align: middle;
-}
-
 .account-heading {
   font-size: 2.5rem;
 }
@@ -80,4 +40,48 @@ a.article-title:hover {
   -ms-transform: translate(-50%, -50%);
   transform: translate(-50%, -50%);
   bottom: 0px;
+}
+
+.wave {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    overflow: hidden;
+    line-height: 0;
+}
+
+.wave svg {
+    position: relative;
+    display: block;
+    width: calc(122% + 1.3px);
+    height: 160px;
+}
+
+.wave .shape-fill {
+    fill: #08192E;
+}
+
+.bgcolor.scrolled {
+    background-color: #111127E;
+    transition: background-color 200ms linear;
+}
+
+.spacer {
+    width: 100%;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: cover;
+}
+
+.flex-wrapper {
+  display: flex;
+  min-height: 100vh;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.nav-scrolled {
+  background-color: #111127E !important;
+  transition: background-color 200ms linear;
 }
