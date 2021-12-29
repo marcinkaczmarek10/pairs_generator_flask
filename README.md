@@ -3,8 +3,8 @@
 
 This is random pairs generator, web app based on flask framework. 
 Purpose of this project is to generate random pairs, based on pool given by any user.
-Then user can send email to picked person. Website features authentication using Flask-Login.
-There is also an option using API, it is using HTTP basic auth. To acces other endpoints you need attach token inside request header. Token is returned afeter succesful authentication.
+Then user can send email to a picked person. Website features authentication using Flask-Login.
+There is also an option using API, it is using HTTP basic auth. To acces other endpoints you need to attach token inside request header. Token is returned afeter succesful authentication.
 
 The idea for this project came from christmas lottery, when group of people were about to decide
 who would buy a present for whom. This is the most optimum way to use this project, but there could be more use cases. 
