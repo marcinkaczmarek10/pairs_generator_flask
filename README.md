@@ -48,7 +48,7 @@ This endpoint requires basic HTTP authentication, when succeded returns auth tok
 ```http
   GET /api/results
 ```
-This endpoint return all of user's results. It requires two headers: api_token and Content-Type: aplication/json
+This endpoint returns all of user's results.
 
 ### Generate random pairs
 ```http
@@ -60,7 +60,7 @@ This endpoint return all of user's results. It requires two headers: api_token a
 | `person_name`| `string` | **Required**. |
 | `person_email`| `string` | **Required**. |
 
- Generate random pairs from given pool. Endpoint accept json format and it is required that pool comes in array.
+ Generate random pairs from a given pool. Endpoint accept json format and it is required that pool comes in array.
 
 ### Send mails
 ```http
@@ -82,7 +82,7 @@ Sending emails to pairs in selected draw.
 | :-------- | :------- | :-------------------------------- |
 | `draw_count`| `int` | **Required**.|
 
-Delete results for given draw. 
+Delete result for a given draw. 
 
 
 
