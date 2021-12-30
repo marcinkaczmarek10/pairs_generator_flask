@@ -1,7 +1,8 @@
 body {
   background: #fafafa;
   color: #333333;
-  margin-top: 5rem;
+  margin-top: 7rem;
+  padding: 0;
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -54,8 +55,8 @@ h1, h2, h3, h4, h5, h6 {
 .wave svg {
     position: relative;
     display: block;
-    width: calc(122% + 1.3px);
-    height: 160px;
+    width: calc(100% + 1.3px);
+    height: 110px;
 }
 
 .wave .shape-fill {
@@ -63,11 +64,13 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .bgcolor.scrolled {
-    background-color: #111127E;
+    background-color: #05042c;
     transition: background-color 200ms linear;
 }
 
 .spacer {
+    display: flex
+    justify-con
     width: 100%;
     background-repeat: no-repeat;
     background-position: center;
@@ -79,4 +82,51 @@ h1, h2, h3, h4, h5, h6 {
   min-height: 100vh;
   flex-direction: column;
   justify-content: space-between;
+}
+
+.toggle-button {
+    position: absolute;
+    top: .75rem;
+    right: 1rem;
+    display: none;
+    flex-direction: column;
+    justify-content: space-between;
+    width: 30px;
+    height: 21px;
+}
+
+.toggle-button .bar {
+    height: 3px;
+    width: 100%;
+    background-color: white;
+    border-radius: 10px;
+}
+
+.navbar-right {
+    align: left
+}
+
+@media(max-width: 768px) {
+}
+
+@media(max-width 500px) {
+    .toggle-button {
+        display: flex
+    }
+    .site-header .navbar-nav .nav-link {
+        text-align: center
+    }
+    .navbar {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    .nav-link.active {
+        display: flex
+    }
+    .wave {
+        display: none;
+    }
+    .bgcolor {
+        background-color: #05042c;
+    }
 }

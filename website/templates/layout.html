@@ -13,7 +13,7 @@
       <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarToggle" aria-controls="navbarToggle" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
       </button>
-      <div class="collapse navbar-collapse" id="navbarToggle">
+      <div class="collapse navbar-collapse me-auto" id="navbarToggle">
         <div class="navbar-nav mr-auto">
             {% if current_user.is_authenticated %}
            <a class="nav-item nav-link" href="/">Home</a>
@@ -23,9 +23,8 @@
             <a class="nav-item nav-link" href="/">Home</a>
             {% endif %}
         </div>
-      </div>
         <!-- Navbar Right Side -->
-        <div class="navbar-nav">
+        <div class="navbar-nav me-auto">
             {% if current_user.is_authenticated %}
                 <a class="nav-item nav-link" href="/account">My account</a>
                 <a class="nav-item nav-link" href="/logout">Logout</a>
@@ -34,11 +33,12 @@
                 <a class="nav-item nav-link" href="/register">Register</a>
             {% endif %}
         </div>
+      </div>
     </div>
   </nav>
     <div class="wave">
         <svg data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none">
-            <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V0H0V27.35A600.21,600.21,0,0,0,321.39,56.44Z" class="shape-fill"></path>
+        <path d="M0,0V7.23C0,65.52,268.63,112.77,600,112.77S1200,65.52,1200,7.23V0Z" class="shape-fill"></path>
         </svg>
     </div>
 </header>
@@ -76,9 +76,11 @@
             $("nav").toggleClass("scrolled", $(this).scrollTop()>50);
         });
     </script>
+    <script type="text/javascript" src="{{ url_for('static', filename='main.js') }}">
+    </script>
 </body>
 <footer>
-<div class="spacer">
+<div class="flex-footer">
    <svg id="visual" viewBox="0 0 1500 400" width="1500" height="400" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1">
 	    <rect x="0" y="0" width="1500" height="400" fill="#FFFFFF"></rect>
 	        <path d="M0 156L35.7 153.8C71.3 151.7 142.7 147.3 214.2 138.8C285.7 130.3 357.3 117.7 428.8 121.5C500.3 125.3 571.7 145.7 643 160.2C714.3 174.7 785.7 183.3 857 179.3C928.3 175.3 999.7 158.7 1071.2 156.8C1142.7 155 1214.3 168 1285.8 169.2C1357.3 170.3 1428.7 159.7 1464.3 154.3L1500 149L1500 401L1464.3 401C1428.7 401 1357.3 401 1285.8 401C1214.3 401 1142.7 401 1071.2 401C999.7 401 928.3 401 857 401C785.7 401 714.3 401 643 401C571.7 401 500.3 401 428.8 401C357.3 401 285.7 401 214.2 401C142.7 401 71.3 401 35.7 401L0 401Z" fill="#090c1e">
