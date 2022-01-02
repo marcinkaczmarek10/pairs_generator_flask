@@ -15,7 +15,6 @@ who would buy a present for whom. This is the most optimum way to use this proje
 
 https://random-pairs-generator.herokuapp.com
 
-* This website is not responsive yet.
 
 
 ## Features
