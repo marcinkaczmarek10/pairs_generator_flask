@@ -10,23 +10,25 @@
                         &times;
                     </span>
                 </button>
-                 <ul class="list-group list-group-flush">
+                 <ul>
                      {% for pair in draw %}
-                     <div class="form-group content-section">
-                         <li class="list-group-item list-group-flush">
-                             <p>
+                         <li class="list-group-item">
+                             <span>
                                  First person names is: {{ pair['first_person_name'] }},
+                             </span>
+                             <span>
                                  Second person name is: {{ pair['second_person_name'] }}
-                             </p>
+                             </span>
                          </li>
-                     </div>
                      {% endfor %}
+                     <div class="button">
+                    <button class="btn btn-outline-info center"  onClick="submitResult({{ draw }})">
+                        <span>
+                            Submit
+                        </span>
+                    </button>
+                     </div>
                  </ul>
-                <button class="btn btn-outline-info center"  onClick="submitResult({{ draw }})">
-                    <span>
-                        Submit
-                    </span>
-                </button>
             </div>
         {% endfor %}
     </div>
