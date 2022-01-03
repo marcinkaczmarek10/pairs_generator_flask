@@ -7,21 +7,21 @@ from website.database.models import User
 
 class RegistrationForm(FlaskForm):
     username = StringField(
-        'username',
+        'Username',
         validators=[
             DataRequired(),
             Length(min=2, max=20)
         ]
     )
     email = StringField(
-        'email',
+        'Email',
         validators=[
             DataRequired(),
             Email()
         ]
     )
     password = PasswordField(
-        'password',
+        'Password',
         validators=[
             DataRequired()
         ]
@@ -50,14 +50,14 @@ class RegistrationForm(FlaskForm):
 
 class LoginForm(FlaskForm):
     email = StringField(
-        'email',
+        'Email',
         validators=[
             DataRequired(),
             Email()
         ]
     )
     password = PasswordField(
-        'password',
+        'Password',
         validators=[
             DataRequired()
         ]
