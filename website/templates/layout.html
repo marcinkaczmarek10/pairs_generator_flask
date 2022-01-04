@@ -5,16 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BmbxuPwQa2lc/FVzBcNJ7UAyJxM6wuqIj61tLrc4wSX0szH/Ev+nYRRuWlolflfl" crossorigin="anonymous">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='main.css') }}">
-</head>
 <body>
 <header class="site-header">
-  <nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
+  <nav class="navbar navbar-expand-md navbar-dark bgcolor fixed-top">
     <div class="container">
       <a class="navbar-brand mr-4" href="/">Random pairs generator</a>
       <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarToggle" aria-controls="navbarToggle" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
       </button>
-      <div class="collapse navbar-collapse" id="navbarToggle">
+      <div class="collapse navbar-collapse me-auto" id="navbarToggle">
         <div class="navbar-nav mr-auto">
             {% if current_user.is_authenticated %}
            <a class="nav-item nav-link" href="/">Home</a>
@@ -24,9 +23,8 @@
             <a class="nav-item nav-link" href="/">Home</a>
             {% endif %}
         </div>
-      </div>
         <!-- Navbar Right Side -->
-        <div class="navbar-nav">
+        <div class="navbar-nav me-auto">
             {% if current_user.is_authenticated %}
                 <a class="nav-item nav-link" href="/account">My account</a>
                 <a class="nav-item nav-link" href="/logout">Logout</a>
@@ -35,9 +33,16 @@
                 <a class="nav-item nav-link" href="/register">Register</a>
             {% endif %}
         </div>
+      </div>
     </div>
   </nav>
+    <div class="wave">
+        <svg data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none">
+        <path d="M0,0V7.23C0,65.52,268.63,112.77,600,112.77S1200,65.52,1200,7.23V0Z" class="shape-fill"></path>
+        </svg>
+    </div>
 </header>
+<div class="flex-wrapper">
     <div class="container">
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
@@ -50,6 +55,7 @@
         {% endwith %}
         {% block content%}{% endblock %}
     </div>
+</div>
     <script
       src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
       integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
@@ -65,5 +71,28 @@
       integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
       crossorigin="anonymous"
     ></script>
+    <script>
+        $(window).scroll(function(){
+            $("nav").toggleClass("scrolled", $(this).scrollTop()>50);
+        });
+    </script>
+    <script type="text/javascript" src="{{ url_for('static', filename='main.js') }}">
+    </script>
 </body>
+<footer>
+<div class="spacer">
+   <svg id="visual" viewBox="0 0 1500 400" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1">
+            <path d="M0 156L35.7 153.8C71.3 151.7 142.7 147.3 214.2 138.8C285.7 130.3 357.3 117.7 428.8 121.5C500.3 125.3 571.7 145.7 643 160.2C714.3 174.7 785.7 183.3 857 179.3C928.3 175.3 999.7 158.7 1071.2 156.8C1142.7 155 1214.3 168 1285.8 169.2C1357.3 170.3 1428.7 159.7 1464.3 154.3L1500 149L1500 401L1464.3 401C1428.7 401 1357.3 401 1285.8 401C1214.3 401 1142.7 401 1071.2 401C999.7 401 928.3 401 857 401C785.7 401 714.3 401 643 401C571.7 401 500.3 401 428.8 401C357.3 401 285.7 401 214.2 401C142.7 401 71.3 401 35.7 401L0 401Z" fill="#090c1e">
+        </path>
+        <path d="M0 217L35.7 218.7C71.3 220.3 142.7 223.7 214.2 226.8C285.7 230 357.3 233 428.8 224.8C500.3 216.7 571.7 197.3 643 185.5C714.3 173.7 785.7 169.3 857 177C928.3 184.7 999.7 204.3 1071.2 202.5C1142.7 200.7 1214.3 177.3 1285.8 172.2C1357.3 167 1428.7 180 1464.3 186.5L1500 193L1500 401L1464.3 401C1428.7 401 1357.3 401 1285.8 401C1214.3 401 1142.7 401 1071.2 401C999.7 401 928.3 401 857 401C785.7 401 714.3 401 643 401C571.7 401 500.3 401 428.8 401C357.3 401 285.7 401 214.2 401C142.7 401 71.3 401 35.7 401L0 401Z" fill="#101f44">
+        </path>
+        <path d="M0 252L35.7 254.7C71.3 257.3 142.7 262.7 214.2 256.8C285.7 251 357.3 234 428.8 231.2C500.3 228.3 571.7 239.7 643 240.2C714.3 240.7 785.7 230.3 857 229.3C928.3 228.3 999.7 236.7 1071.2 233.8C1142.7 231 1214.3 217 1285.8 223.3C1357.3 229.7 1428.7 256.3 1464.3 269.7L1500 283L1500 401L1464.3 401C1428.7 401 1357.3 401 1285.8 401C1214.3 401 1142.7 401 1071.2 401C999.7 401 928.3 401 857 401C785.7 401 714.3 401 643 401C571.7 401 500.3 401 428.8 401C357.3 401 285.7 401 214.2 401C142.7 401 71.3 401 35.7 401L0 401Z" fill="#14316d">
+        </path>
+        <path d="M0 290L35.7 286.3C71.3 282.7 142.7 275.3 214.2 271.2C285.7 267 357.3 266 428.8 273.8C500.3 281.7 571.7 298.3 643 307.7C714.3 317 785.7 319 857 309.2C928.3 299.3 999.7 277.7 1071.2 278.5C1142.7 279.3 1214.3 302.7 1285.8 303.8C1357.3 305 1428.7 284 1464.3 273.5L1500 263L1500 401L1464.3 401C1428.7 401 1357.3 401 1285.8 401C1214.3 401 1142.7 401 1071.2 401C999.7 401 928.3 401 857 401C785.7 401 714.3 401 643 401C571.7 401 500.3 401 428.8 401C357.3 401 285.7 401 214.2 401C142.7 401 71.3 401 35.7 401L0 401Z" fill="#194399">
+        </path>
+        <path d="M0 336L35.7 338.7C71.3 341.3 142.7 346.7 214.2 343.2C285.7 339.7 357.3 327.3 428.8 327C500.3 326.7 571.7 338.3 643 338.2C714.3 338 785.7 326 857 321.8C928.3 317.7 999.7 321.3 1071.2 329.7C1142.7 338 1214.3 351 1285.8 356.7C1357.3 362.3 1428.7 360.7 1464.3 359.8L1500 359L1500 401L1464.3 401C1428.7 401 1357.3 401 1285.8 401C1214.3 401 1142.7 401 1071.2 401C999.7 401 928.3 401 857 401C785.7 401 714.3 401 643 401C571.7 401 500.3 401 428.8 401C357.3 401 285.7 401 214.2 401C142.7 401 71.3 401 35.7 401L0 401Z" fill="#2455c7">
+        </path>
+    </svg>
+</div>
+</footer>
 </html>

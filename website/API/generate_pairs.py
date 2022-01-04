@@ -7,6 +7,7 @@ from website.generate_pairs.generate_random_pairs import generate_random_pairs, 
 from website.utils.data_serializers import ResultSchema, RandomPersonSchema
 from website.utils.login_manager import token_required
 from website.utils.email_sending import send_mail_to_pairs, MailError
+from website.generate_pairs.routes import limiter
 
 
 api = Blueprint('api', __name__)
@@ -108,6 +109,7 @@ def delete_results(user):
 
 @api.route('/send-email', methods=['POST'])
 @token_required
+@limiter.limit('20/day')
 def send_email_to_chosen(user):
     req = request.get_json()
     query = SessionFactory.session.query(RandomPair).filter_by(draw_count=req['draw_count']).all()
