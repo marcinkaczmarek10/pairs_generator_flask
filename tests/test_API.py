@@ -5,6 +5,7 @@ from website.database.DB import SessionFactory, SessionContextManager
 from website.config import TestingConfig
 from website.database.models import User, UsersPerson
 import base64
+from werkzeug.security import generate_password_hash
 
 
 class ApiTestCase(unittest.TestCase):
@@ -22,7 +23,7 @@ class ApiTestCase(unittest.TestCase):
         SessionFactory.Base.metadata.create_all(SessionFactory.engine)
         user = User(username='user',
                     email='user@testmail.com',
-                    password='test')
+                    password=generate_password_hash('test', 'sha256'))
         pair = UsersPerson(person_name='Janusz',
                            person_email='janusz@testmail.com')
         with SessionContextManager() as session:
@@ -38,7 +39,7 @@ class ApiTestCase(unittest.TestCase):
 
     def test_api_auth(self):
         credentials = base64.b64encode(b"user:test").decode('utf-8')
-        res = self.client.get('/api/login', headers={'Authorization': 'Basic Og' + credentials})
+        res = self.client.get('/api/login', headers={'Authorization': 'Basic ' + credentials})
         self.assertEqual(res.status_code, 200)
 
     def test_no_auth(self):
