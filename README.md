@@ -1,5 +1,6 @@
 
 # Random pairs generator
+![GitHub language count](https://img.shields.io/github/languages/count/marcinkaczmarek10/pairs_generator_flask) ![Website](https://img.shields.io/website?url=https%3A%2F%2Frandom-pairs-generator.herokuapp.com)
 
 This is random pairs generator, web app based on flask framework. 
 Purpose of this project is to generate random pairs, based on pool given by any user.
