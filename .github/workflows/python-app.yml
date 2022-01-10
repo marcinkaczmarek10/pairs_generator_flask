@@ -37,3 +37,7 @@ jobs:
     - name: Coverage
       run: |
         coverage run -m unittest
+    - name: "Upload coverage to Codecov"
+      uses: codecov/codecov-action@v2
+      with:
+        fail_ci_if_error: true
