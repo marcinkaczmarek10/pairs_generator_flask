@@ -1,8 +1,8 @@
 
-# Random pair generator
+# Random pairs generator
 ![GitHub language count](https://img.shields.io/github/languages/count/marcinkaczmarek10/pairs_generator_flask) ![Website](https://img.shields.io/website?url=https%3A%2F%2Frandom-pairs-generator.herokuapp.com) [![Tests](https://github.com/marcinkaczmarek10/pairs_generator_flask/actions/workflows/python-app.yml/badge.svg)](https://github.com/marcinkaczmarek10/pairs_generator_flask/actions/workflows/python-app.yml) ![Codecov](https://img.shields.io/codecov/c/github/marcinkaczmarek10/pairs_generator_flask)
 
-This is random pair generator, web app based on flask framework. 
+This is random pairs generator, web app based on flask framework. 
 Purpose of this project is to generate random pairs, based on pool given by any user.
 Then user can send email to a picked person. Website features authentication using Flask-Login.
 There is also an option using API, it has HTTP basic auth. To acces other endpoints you need to attach token inside request header. Token is returned after successful authentication.
