@@ -12,12 +12,13 @@ def api_login():
     auth = request.authorization
 
     if not auth or not auth.username or not auth.password:
-        return make_response({'message': 'Could not verify!'}), 401
-
+        return make_response({'message': 'Invalid credentials!'},
+                             {'www-Authenticate': 'Basic Realm="Login Required"'}), 401
     user = SessionFactory.session.query(User).filter_by(username=auth.username).first()
 
     if user and check_password_hash(user.password, auth.password):
         token = user.get_token()
         return jsonify({'token': token}), 200
 
-    return make_response({'message': 'Wrong password'}), 401
+    return make_response({'message': 'Could not verify!'},
+                         {'www-Authenticate': 'Basic Realm="Login Required"'}), 401
