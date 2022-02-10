@@ -1,4 +1,4 @@
-from random import choice
+from random
 from dataclasses import dataclass
 
 
@@ -21,16 +21,13 @@ def generate_random_pairs(random_people: list) -> list:
     draw_results = []
 
     for person in random_people:
-        is_alone_in_pool = draw_pool == [person]
-        if is_alone_in_pool:
+        if is_alone_in_pool := draw_pool == [person]:
             return generate_random_pairs(random_people)
 
-        chosen_person = choice(draw_pool)
-        someone_drew_himself = chosen_person == person
+        chosen_person = random.choice(draw_pool)
 
-        while someone_drew_himself:
-            chosen_person = choice(draw_pool)
-            someone_drew_himself = chosen_person == person
+        while someone_drew_himself := chosen_person == person:
+            chosen_person = random.choice(draw_pool)
 
         draw_pool.remove(chosen_person)
         draw_results.append([person, chosen_person])
