@@ -8,8 +8,11 @@ if os.environ.get('ENV') == 'PRODUCTION':
     database_uri = os.environ.get('DATABASE_URL')
     if database_uri.startswith('postgres://'):
         database_uri = database_uri.replace('postgres://', 'postgresql://', 1)
+elif os.environ.get('ENV') == 'DEV':
+    database_uri = f'postgresql://{os.environ.get("POSTGRES_USER")}:{os.environ.get("POSTGRES_PASSWORD")}@' \
+        f'{os.environ.get("POSTGRES_SERVER")}:{os.environ.get("POSTGRES_PORT")}/{os.environ.get("POSTGRES_DB")}'
 else:
-    database_uri = 'sqlite:///generatePairsDB.db'
+    database_uri = 'sqlite://'
 
 
 class ConnectionWithDataBaseError(Exception):
