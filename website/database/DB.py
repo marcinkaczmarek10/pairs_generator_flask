@@ -12,7 +12,7 @@ elif os.environ.get('ENV') == 'DEV':
     database_uri = f'postgresql://{os.environ.get("POSTGRES_USER")}:{os.environ.get("POSTGRES_PASSWORD")}@' \
         f'{os.environ.get("POSTGRES_SERVER")}:{os.environ.get("POSTGRES_PORT")}/{os.environ.get("POSTGRES_DB")}'
 else:
-    database_uri = 'sqlite://:memory:'
+    database_uri = 'sqlite://'
 
 
 class ConnectionWithDataBaseError(Exception):
