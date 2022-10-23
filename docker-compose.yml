@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  web:
+    build:
+      context: ""
+      dockerfile: Dockerfile
+    command: python main.py
+    volumes:
+      - ./website/:/pairs_generator_flask/website
+    ports:
+      - 8000:5000
+    env_file:
+      - ./.env
+    depends_on:
+      - db
+      - smtp
+  db:
+    image: postgres:15
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    env_file:
+      - .env
+  smtp:
+    image: inbucket/inbucket
+    ports:
+      - 9000:9000
+volumes:
+  postgres_data:
