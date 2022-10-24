@@ -20,6 +20,9 @@ def login():
     form = LoginForm()
     if form.validate_on_submit():
         user = SessionFactory.session.query(User).filter_by(email=form.email.data).first()
+        # if not user.is_confirmed:
+        #     flash('You need to confirm your account!', 'danger')
+        #     return redirect('/login')
 
         if user and check_password_hash(user.password, form.password.data):
             login_user(user, remember=form.remember.data)
@@ -65,7 +68,6 @@ def register():
                 sessionCM.add(user)
             except Exception as err:
                 flash('Something went wrong', 'danger')
-                raise err
 
         send_verification_mail(user)
         flash(

@@ -1,0 +1,10 @@
+{% extends 'email/base_email.html' %}
+{% block title %}
+  Account verification for Christmas lottery gift picker.
+{% endblock %}
+{% block content %}
+  Click the button below to verify account.
+{% endblock %}
+{% block button %}
+    <a href="{{ token }}"> Verify account</a>
+{% endblock %}
