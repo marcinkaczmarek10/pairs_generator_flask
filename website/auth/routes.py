@@ -1,4 +1,5 @@
 import os
+import click
 from flask import Blueprint, render_template, flash, redirect, request
 from flask_login import current_user, login_user, logout_user, login_required
 from website.database.DB import SessionContextManager, SessionFactory
@@ -167,6 +168,30 @@ def account():
             flash('Your password has been updated!', 'success')
 
     return render_template('account.html', form=form)
+
+
+@auth.cli.command('create_superuser')
+@click.argument('name')
+@click.argument('email')
+@click.argument('password')
+def create_superuser(name, email, password):
+    hashed_password = generate_password_hash(
+        password,
+        method='sha256'
+    )
+    with SessionContextManager() as sessionCM:
+        user = User(
+            username=name,
+            email=email,
+            password=hashed_password,
+            is_admin=True,
+            is_confirmed=True
+        )
+        try:
+            sessionCM.add(user)
+            click.echo(f'User {name} created!')
+        except Exception as err:
+            click.echo(err)
 
 
 if not os.environ.get('ENV') == 'PRODUCTION':

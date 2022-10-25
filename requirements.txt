@@ -5,6 +5,7 @@ coverage==6.2
 dnspython==2.1.0
 email-validator==1.1.2
 Flask==2.0.2
+Flask-Admin==1.6.0
 Flask-Limiter==2.0.3
 Flask-Login==0.5.0
 Flask-Mail==0.9.1
