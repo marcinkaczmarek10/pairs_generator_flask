@@ -3,13 +3,15 @@ import os
 
 class Config:
     SECRET_KEY = os.environ.get('SECRET_KEY')
+    FLASK_ADMIN_SWATCH = 'cosmo'
+    DEBUG = True if os.environ.get('DEBUG') in (True, 1, 'True', 'TRUE') else False
+    ENV = os.environ.get('ENV')
     MAIL_USERNAME = os.environ.get('MAIL_USERNAME')
     MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
     MAIL_DEFAULT_SENDER = os.environ.get('MAIL_DEFAULT_SENDER')
 
 
 class DevelopConfig(Config):
-    DEBUG = os.environ.get('DEBUG')
     MAIL_SERVER = 'smtp'
     MAIL_PORT = 2500
     MAIL_USE_TLS = False

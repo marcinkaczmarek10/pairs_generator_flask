@@ -1,10 +1,11 @@
+import os
 from flask import Flask
 from website.utils.login_manager import login_manager, CustomCookieSessionInterface
 from website.config import ProductionConfig, DevelopConfig
 from website.utils.email_sending import mail
 from website.utils.data_serializers import marshmallow
 from website.generate_pairs.routes import limiter
-import os
+from website.admin.routes import admin
 
 
 if os.environ.get('ENV') == 'PRODUCTION':
@@ -21,6 +22,7 @@ def create_app(config_name=config):
     mail.init_app(app)
     marshmallow.init_app(app)
     limiter.init_app(app)
+    admin.init_app(app)
     app.session_interface = CustomCookieSessionInterface()
 
     from website.auth.routes import auth

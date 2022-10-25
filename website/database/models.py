@@ -31,6 +31,10 @@ class User(SessionFactory.Base, UserMixin):
         Boolean,
         default=False
     )
+    is_admin = Column(
+        Boolean,
+        default=False
+    )
     user_pairs = relationship(
         'UsersPerson'
     )
