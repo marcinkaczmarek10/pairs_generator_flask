@@ -2,76 +2,77 @@
 {% block content %}
 <div class="content-section">
     <div class="form-group">
-        <div class="form-group">
-            <div class="form-group">
-                <form method="POST" action="">
-                {{ form.csrf_token }}
-                <fieldset class="form-group">
-                    <legend class="border-bottom mb-4">Generate Pairs</legend>
-                     <div class="form-group">
-                       {{ form.person_name.label(class="form-control-label") }}
-                         {% if form.person_name.errors %}
-                            {{ form.person_name(class="form-control form-control-lg is-invalid") }}
-                            <div class="invalid-feedback">
-                                {% for error in form.person_name.errors %}
-                                    <span>{{ error }}</span>
-                                {% endfor %}
-                            </div>
-                         {% else %}
-                            {{ form.person_name(class="form-control form-control-lg") }}
-                         {% endif %}
-                     </div>
-                    <div class="form-group">
-                        <div class="form-group">
-                            {{ form.person_email.label(class="form-control-label") }}
-                                {% if form.person_email.errors %}
-                                    {{ form.person_email(class="form-control form-control-lg is-invalid") }}
-                                        <div class="invalid-feedback">
-                                            {% for error in form.person_email.errors %}
-                                                <span>{{ error }}</span>
-                                            {% endfor %}
-                                        </div>
-                                {% else %}
-                                    {{ form.person_email(class="form-control form-control-lg") }}
-                                {% endif %}
+        <form method="POST" action="">
+            {{ form.csrf_token }}
+            <fieldset class="form-group">
+                <legend class="border-bottom mb-4">Generate Pairs</legend>
+                 <div class="form-group">
+                   {{ form.person_name.label(class="form-control-label") }}
+                     {% if form.person_name.errors %}
+                        {{ form.person_name(class="form-control form-control-lg is-invalid") }}
+                        <div class="invalid-feedback">
+                            {% for error in form.person_name.errors %}
+                                <span>{{ error }}</span>
+                            {% endfor %}
                         </div>
-                        <br />
-                        <div class="form-group">
-                            {{ form.add_item(class='btn btn-outline-info') }}
-                        </div>
-                </div>
-                </fieldset>
-                </form>
-                        <div class="form-group">
-                            <form action="{{ url_for('generate_pairs.delete_person') }}" method="POST">
-                                {{ form.remove_item(class='btn btn-outline-info') }}
-                            </form>
-                        </div>
-                        <br />
-            </div>
-            {% for pair in user_pair %}
-            <ul class="list-group list-group-flush">
+                     {% else %}
+                        {{ form.person_name(class="form-control form-control-lg") }}
+                     {% endif %}
+                 </div>
                 <div class="form-group">
-                    <li class="list-group-item">
-                    {{ pair.person_name }}
-                    {{ pair.person_email }}
-                    </li>
+                    <div class="form-group">
+                        {{ form.person_email.label(class="form-control-label") }}
+                            {% if form.person_email.errors %}
+                                {{ form.person_email(class="form-control form-control-lg is-invalid") }}
+                                    <div class="invalid-feedback">
+                                        {% for error in form.person_email.errors %}
+                                            <span>{{ error }}</span>
+                                        {% endfor %}
+                                    </div>
+                            {% else %}
+                                {{ form.person_email(class="form-control form-control-lg") }}
+                            {% endif %}
+                    </div>
                 </div>
-            </ul>
-            {% endfor %}
-            <br />
-            <div class="form-group" align="center">
+                <div class="w-100 d-md-flex justify-content-center mb-2">
+                    <a class="m-1">
+                        {{ form.add_item(class='btn btn-outline-info') }}
+                    </a>
+                    <button type="button" class="btn btn-outline-info m-1" onClick="deletePerson()">
+                        Remove Item
+                    </button>
+                </div>
+            </fieldset>
+        </form>
+        {% if user_pair %}
+             <table class="table text-center">
+                <thead class="table-dark">
+                    <tr>
+                        <th scope="col">#</th>
+                        <th scope="col">Name</th>
+                        <th scope="col">Email</th>
+                    </tr>
+                </thead>
+                 <tbody class="table-hover">
+                     {% for pair in user_pair %}
+                         <tr>
+                             <th scope="row">{{ loop.index }}</th>
+                             <td>
+                                 {{ pair.person_name}}
+                             </td>
+                             <td>
+                                 {{ pair.person_email }}
+                             </td>
+                         </tr>
+                     {% endfor %}
+                 </tbody>
+            </table>
+            <div class="text-center">
                 <form action="{{ url_for('generate_pairs.results') }}" method="POST">
                     {{ form.submit(class='btn btn-outline-info') }}
                 </form>
-
             </div>
-        </div>
+        {% endif %}
     </div>
 </div>
-<script
-    type="text/javascript"
-    src="{{ url_for('static', filename='main.js') }}"
->
-</script>
 {% endblock %}

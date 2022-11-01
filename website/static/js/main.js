@@ -1,3 +1,11 @@
+function deletePerson() {
+    fetch('/delete-person', {
+        method: 'POST'
+    })
+    .then((res) => window.location.reload()
+    );
+};
+
 function deleteResult(draw){
 	fetch("/delete-result", {
 		method: "POST",
