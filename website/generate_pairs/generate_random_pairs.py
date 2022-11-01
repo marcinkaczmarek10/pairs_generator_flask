@@ -2,7 +2,7 @@ import random
 from dataclasses import dataclass
 
 
-@dataclass
+@dataclass(eq=False)
 class Person:
     name: str
     email: str
@@ -21,7 +21,9 @@ def generate_random_pairs(random_people: list) -> list:
     draw_results = []
 
     for person in random_people:
+        print(person)
         if is_alone_in_pool := draw_pool == [person]:
+            print('return')
             return generate_random_pairs(random_people)
 
         chosen_person = random.choice(draw_pool)

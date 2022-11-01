@@ -71,7 +71,13 @@ def results():
         draw_pool = [
             Person(row.person_name, row.person_email) for row in user_draw_pool
         ]
-        user_results = generate_random_pairs(draw_pool)
+        try:
+            user_results = generate_random_pairs(draw_pool)
+        except TypeError:
+            flash('Something went wrong!', 'danger')
+            with SessionContextManager():
+                SessionFactory.session.query(UsersPerson).filter_by(user_id=current_user.id).delete()
+            return redirect('/generate-pairs')
         draw_count = DrawCount(user_id=current_user.id)
 
         with SessionContextManager() as sessionCM:
